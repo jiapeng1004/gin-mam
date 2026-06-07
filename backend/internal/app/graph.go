@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-mam/backend/internal/domain/asset"
+	assetmodel "github.com/gin-mam/backend/internal/domain/asset/model"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/domain/sys/model"
 	infraconfig "github.com/gin-mam/backend/internal/infra/config"
@@ -15,14 +17,17 @@ import (
 )
 
 type Graph struct {
-	DB         *gorm.DB
-	Redis      *redis.Client
-	TxMgr      tx.Manager
-	ConfigSvc  infraconfig.Service
-	SysRepo    sys.Repository
-	SysSvc     sys.Service
-	SysHandler *sys.Handler
-	Router     *gin.Engine
+	DB            *gorm.DB
+	Redis         *redis.Client
+	TxMgr         tx.Manager
+	ConfigSvc     infraconfig.Service
+	SysRepo       sys.Repository
+	SysSvc        sys.Service
+	SysHandler    *sys.Handler
+	AssetRepo     asset.Repository
+	AssetSvc      asset.Service
+	AssetHandler  *asset.Handler
+	Router        *gin.Engine
 }
 
 func Build(cfg *Config) (*Graph, error) {
@@ -41,6 +46,9 @@ func Build(cfg *Config) (*Graph, error) {
 		&model.Org{},
 		&model.Menu{},
 		&infraconfig.SysConfig{},
+		&assetmodel.Asset{},
+		&assetmodel.AssetFile{},
+		&assetmodel.AssetMetadata{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
 	}
@@ -54,16 +62,22 @@ func Build(cfg *Config) (*Graph, error) {
 		ExpireHours: cfg.JWT.ExpireHours,
 	})
 	sysHandler := sys.NewHandler(sysSvc)
-	router := NewRouter(sysHandler, cfg.JWT.Secret)
+	assetRepo := asset.NewMySQLRepository(db)
+	assetSvc := asset.NewService(assetRepo, configSvc, txMgr)
+	assetHandler := asset.NewHandler(assetSvc)
+	router := NewRouter(sysHandler, assetHandler, cfg.JWT.Secret)
 
 	return &Graph{
-		DB:         db,
-		Redis:      rdb,
-		TxMgr:      txMgr,
-		ConfigSvc:  configSvc,
-		SysRepo:    sysRepo,
-		SysSvc:     sysSvc,
-		SysHandler: sysHandler,
-		Router:     router,
+		DB:           db,
+		Redis:        rdb,
+		TxMgr:        txMgr,
+		ConfigSvc:    configSvc,
+		SysRepo:      sysRepo,
+		SysSvc:       sysSvc,
+		SysHandler:   sysHandler,
+		AssetRepo:    assetRepo,
+		AssetSvc:     assetSvc,
+		AssetHandler: assetHandler,
+		Router:       router,
 	}, nil
 }
