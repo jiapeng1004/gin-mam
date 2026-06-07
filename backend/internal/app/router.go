@@ -24,5 +24,9 @@ func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, jwtSecret s
 	authed.PUT("/asset/:id", assetHandler.Update)
 	authed.DELETE("/asset/:id", assetHandler.Delete)
 
+	authed.POST("/asset/upload/init", assetHandler.UploadInit)
+	authed.POST("/asset/upload/chunk", assetHandler.UploadChunk)
+	authed.POST("/asset/upload/complete", assetHandler.UploadComplete)
+
 	return r
 }
