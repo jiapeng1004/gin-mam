@@ -323,13 +323,19 @@ web/src/features/
 
 axios：`2xx → response.data` 即业务体；`4xx/5xx → err_code / err_msg`
 
-### 7.2 Flutter MVP
+### 7.2 移动端 MVP（Flutter + Ant Design Flutter 生态）
 
 ```
 mobile/lib/features/
-  auth/login
+  auth/login          # antd_flutter_mobile 表单/按钮
   audit/{pending_list, detail, action}
 ```
+
+**技术选型：**
+- 框架：**Flutter 3**
+- UI：**`antd_flutter_mobile`**（Ant Design Mobile，与 Web Ant Design 设计语言一致）
+- 不用 `ant_design_flutter`（偏 Web/桌面，官方不推荐移动端）
+- 网络：Dio；状态：Riverpod
 
 仅登录 + 待审 + 审核；上传/编目留 Web。
 
