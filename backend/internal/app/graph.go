@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-mam/backend/internal/domain/asset"
+	"github.com/gin-mam/backend/internal/domain/catalog"
+	catalogmodel "github.com/gin-mam/backend/internal/domain/catalog/model"
 	assetmodel "github.com/gin-mam/backend/internal/domain/asset/model"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/domain/sys/model"
@@ -29,6 +31,9 @@ type Graph struct {
 	AssetRepo     asset.Repository
 	AssetSvc      asset.Service
 	AssetHandler  *asset.Handler
+	CatalogRepo    catalog.Repository
+	CatalogSvc     catalog.Service
+	CatalogHandler *catalog.Handler
 	AssetUpload   asset.UploadService
 	ObjectStorage storage.Storage
 	Router        *gin.Engine
@@ -53,6 +58,8 @@ func Build(cfg *Config) (*Graph, error) {
 		&assetmodel.Asset{},
 		&assetmodel.AssetFile{},
 		&assetmodel.AssetMetadata{},
+		&catalogmodel.Catalog{},
+		&catalogmodel.CatalogConfig{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
 	}
@@ -74,7 +81,10 @@ func Build(cfg *Config) (*Graph, error) {
 	assetSvc := asset.NewService(assetRepo, configSvc, txMgr)
 	assetUpload := asset.NewUploadService(asset.NewRedisUploadStore(rdb), configSvc, objectStorage, assetSvc)
 	assetHandler := asset.NewHandler(assetSvc, assetUpload)
-	router := NewRouter(sysHandler, assetHandler, cfg.JWT.Secret)
+	catalogRepo := catalog.NewMySQLRepository(db)
+	catalogSvc := catalog.NewService(catalogRepo)
+	catalogHandler := catalog.NewHandler(catalogSvc)
+	router := NewRouter(sysHandler, assetHandler, catalogHandler, cfg.JWT.Secret)
 
 	return &Graph{
 		DB:           db,
@@ -88,6 +98,9 @@ func Build(cfg *Config) (*Graph, error) {
 		AssetSvc:     assetSvc,
 		AssetHandler: assetHandler,
 		AssetUpload:  assetUpload,
+		CatalogRepo:    catalogRepo,
+		CatalogSvc:     catalogSvc,
+		CatalogHandler: catalogHandler,
 		ObjectStorage: objectStorage,
 		Router:       router,
 	}, nil
