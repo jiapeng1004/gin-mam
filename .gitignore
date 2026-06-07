@@ -1,0 +1,9 @@
+.worktrees/
+backend/bin/
+web/node_modules/
+web/dist/
+mobile/.dart_tool/
+mobile/build/
+*.exe
+.env
+.env.local
