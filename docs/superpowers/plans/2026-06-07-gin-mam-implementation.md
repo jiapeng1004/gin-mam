@@ -805,15 +805,18 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 # 里程碑 M6：Flutter 审核端
 
-## 任务 21：Flutter 项目初始化
+## 任务 21：Flutter 项目初始化（Ant Design Flutter 生态）
 
 ```bash
 cd mobile && flutter create . --org com.ginmam
-flutter pub add dio mocktail flutter_riverpod
+flutter pub add antd_flutter_mobile dio mocktail flutter_riverpod
 ```
 
+- UI 组件库：**`antd_flutter_mobile`**（Ant Design Mobile，与 Web Ant Design 设计语言一致）
+- 不用 `ant_design_flutter`（偏 Web/桌面，官方不推荐移动端）
 - [ ] **步骤 1：api_client 解析 ErrorVo（err_code 数值）**
-- [ ] **步骤 2：Commit**
+- [ ] **步骤 2：AntApp/主题壳 + 基础路由**
+- [ ] **步骤 3：Commit**
 
 ---
 
