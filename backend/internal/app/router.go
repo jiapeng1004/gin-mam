@@ -4,11 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-mam/backend/internal/domain/asset"
 	"github.com/gin-mam/backend/internal/domain/catalog"
+	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/pkg/httpx"
 )
 
-func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, jwtSecret string) *gin.Engine {
+func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, searchHandler *search.Handler, jwtSecret string) *gin.Engine {
 	r := gin.New()
 	r.Use(httpx.ErrorMiddleware(), gin.Logger())
 
@@ -35,6 +36,8 @@ func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHand
 	authed.POST("/asset/upload/init", assetHandler.UploadInit)
 	authed.POST("/asset/upload/chunk", assetHandler.UploadChunk)
 	authed.POST("/asset/upload/complete", assetHandler.UploadComplete)
+
+	authed.POST("/search/asset", searchHandler.SearchAsset)
 
 	return r
 }

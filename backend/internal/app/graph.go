@@ -6,37 +6,41 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-mam/backend/internal/domain/asset"
+	assetmodel "github.com/gin-mam/backend/internal/domain/asset/model"
 	"github.com/gin-mam/backend/internal/domain/catalog"
 	catalogmodel "github.com/gin-mam/backend/internal/domain/catalog/model"
-	assetmodel "github.com/gin-mam/backend/internal/domain/asset/model"
+	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/domain/sys/model"
 	infraconfig "github.com/gin-mam/backend/internal/infra/config"
+	"github.com/gin-mam/backend/internal/infra/elasticsearch"
 	"github.com/gin-mam/backend/internal/infra/mysql"
-	"github.com/gin-mam/backend/internal/infra/storage"
 	redispkg "github.com/gin-mam/backend/internal/infra/redis"
+	"github.com/gin-mam/backend/internal/infra/storage"
 	"github.com/gin-mam/backend/internal/infra/tx"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type Graph struct {
-	DB            *gorm.DB
-	Redis         *redis.Client
-	TxMgr         tx.Manager
-	ConfigSvc     infraconfig.Service
-	SysRepo       sys.Repository
-	SysSvc        sys.Service
-	SysHandler    *sys.Handler
-	AssetRepo     asset.Repository
-	AssetSvc      asset.Service
-	AssetHandler  *asset.Handler
+	DB             *gorm.DB
+	Redis          *redis.Client
+	TxMgr          tx.Manager
+	ConfigSvc      infraconfig.Service
+	SysRepo        sys.Repository
+	SysSvc         sys.Service
+	SysHandler     *sys.Handler
+	AssetRepo      asset.Repository
+	AssetSvc       asset.Service
+	AssetHandler   *asset.Handler
 	CatalogRepo    catalog.Repository
 	CatalogSvc     catalog.Service
 	CatalogHandler *catalog.Handler
-	AssetUpload   asset.UploadService
-	ObjectStorage storage.Storage
-	Router        *gin.Engine
+	SearchSvc      search.Service
+	SearchHandler  *search.Handler
+	AssetUpload    asset.UploadService
+	ObjectStorage  storage.Storage
+	Router         *gin.Engine
 }
 
 func Build(cfg *Config) (*Graph, error) {
@@ -78,30 +82,39 @@ func Build(cfg *Config) (*Graph, error) {
 	if err != nil {
 		return nil, fmt.Errorf("storage: %w", err)
 	}
-	assetSvc := asset.NewService(assetRepo, configSvc, txMgr)
+	assetSvc := asset.NewService(assetRepo, configSvc, txMgr, nil)
+	esClient, err := elasticsearch.NewClient(cfg.Elasticsearch.Addresses)
+	if err != nil {
+		return nil, fmt.Errorf("elasticsearch: %w", err)
+	}
+	searchSvc := search.NewService(esClient, assetSvc)
+	asset.WireIndexer(assetSvc, searchSvc)
+	searchHandler := search.NewHandler(searchSvc)
 	assetUpload := asset.NewUploadService(asset.NewRedisUploadStore(rdb), configSvc, objectStorage, assetSvc)
 	assetHandler := asset.NewHandler(assetSvc, assetUpload)
 	catalogRepo := catalog.NewMySQLRepository(db)
 	catalogSvc := catalog.NewService(catalogRepo)
 	catalogHandler := catalog.NewHandler(catalogSvc)
-	router := NewRouter(sysHandler, assetHandler, catalogHandler, cfg.JWT.Secret)
+	router := NewRouter(sysHandler, assetHandler, catalogHandler, searchHandler, cfg.JWT.Secret)
 
 	return &Graph{
-		DB:           db,
-		Redis:        rdb,
-		TxMgr:        txMgr,
-		ConfigSvc:    configSvc,
-		SysRepo:      sysRepo,
-		SysSvc:       sysSvc,
-		SysHandler:   sysHandler,
-		AssetRepo:    assetRepo,
-		AssetSvc:     assetSvc,
-		AssetHandler: assetHandler,
-		AssetUpload:  assetUpload,
+		DB:             db,
+		Redis:          rdb,
+		TxMgr:          txMgr,
+		ConfigSvc:      configSvc,
+		SysRepo:        sysRepo,
+		SysSvc:         sysSvc,
+		SysHandler:     sysHandler,
+		AssetRepo:      assetRepo,
+		AssetSvc:       assetSvc,
+		AssetHandler:   assetHandler,
+		AssetUpload:    assetUpload,
 		CatalogRepo:    catalogRepo,
 		CatalogSvc:     catalogSvc,
 		CatalogHandler: catalogHandler,
-		ObjectStorage: objectStorage,
-		Router:       router,
+		SearchSvc:      searchSvc,
+		SearchHandler:  searchHandler,
+		ObjectStorage:  objectStorage,
+		Router:         router,
 	}, nil
 }

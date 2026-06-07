@@ -1,4 +1,4 @@
-package asset_test
+﻿package asset_test
 
 import (
 	"context"
@@ -67,7 +67,7 @@ func TestGetByID_EnrichesPreviewURL_WhenConfigReturnsDomain(t *testing.T) {
 		Return("https://img.example.com/", nil)
 
 	repo := asset.NewMySQLRepository(db)
-	svc := asset.NewService(repo, cfg, tx.NewManager(db))
+	svc := asset.NewService(repo, cfg, tx.NewManager(db), nil)
 
 	vo, err := svc.GetByID(context.Background(), assetID)
 	require.NoError(t, err)

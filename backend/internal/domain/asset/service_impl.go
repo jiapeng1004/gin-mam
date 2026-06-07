@@ -15,19 +15,41 @@ import (
 )
 
 type service struct {
-	repo   Repository
-	config infraconfig.Service
-	txMgr  tx.Manager
-	now    func() time.Time
+	repo    Repository
+	config  infraconfig.Service
+	txMgr   tx.Manager
+	indexer Indexer
+	now     func() time.Time
 }
 
-func NewService(repo Repository, config infraconfig.Service, txMgr tx.Manager) Service {
+func NewService(repo Repository, config infraconfig.Service, txMgr tx.Manager, indexer Indexer) Service {
 	return &service{
-		repo:   repo,
-		config: config,
-		txMgr:  txMgr,
-		now:    time.Now,
+		repo:    repo,
+		config:  config,
+		txMgr:   txMgr,
+		indexer: indexer,
+		now:     time.Now,
 	}
+}
+
+func WireIndexer(svc Service, indexer Indexer) {
+	if s, ok := svc.(*service); ok {
+		s.indexer = indexer
+	}
+}
+
+func (s *service) scheduleIndex(a *model.Asset) {
+	if s.indexer == nil || a == nil {
+		return
+	}
+	s.indexer.ScheduleIndex(IndexDoc{
+		ID:        a.ID,
+		Title:     a.Title,
+		Type:      a.Type,
+		CatalogID: a.CatalogID,
+		TenantID:  a.TenantID,
+		CreatedAt: a.CreatedAt,
+	})
 }
 
 func (s *service) notFound() *httpx.BizError {
@@ -231,6 +253,7 @@ func (s *service) Create(ctx context.Context, in CreateInput) (*AssetVO, error) 
 	if err != nil {
 		return nil, err
 	}
+	s.scheduleIndex(created)
 	return s.GetByID(ctx, created.ID)
 }
 
@@ -291,6 +314,9 @@ func (s *service) Update(ctx context.Context, assetID string, in UpdateInput) (*
 			return nil, biz
 		}
 		return nil, err
+	}
+	if updated, getErr := s.repo.GetAssetByID(ctx, defaultTenant, assetID); getErr == nil {
+		s.scheduleIndex(updated)
 	}
 	return s.GetByID(ctx, assetID)
 }
