@@ -19,15 +19,28 @@ const { Header, Sider, Content } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-/** 侧栏菜单项与路由 path 的对应关系 */
-const MENU_ITEMS: { key: string; label: string; icon: ReactNode }[] = [
+/** 侧栏顶级菜单（系统管理含子菜单） */
+const TOP_MENU: { key: string; label: string; icon: ReactNode; children?: { key: string; label: string }[] }[] = [
   { key: '/asset/list', label: '媒资管理', icon: <VideoCameraOutlined /> },
   { key: '/catalog', label: '编目', icon: <DatabaseOutlined /> },
   { key: '/review', label: '审核中心', icon: <AuditOutlined /> },
   { key: '/transcode', label: '转码', icon: <CloudUploadOutlined /> },
-  { key: '/system', label: '系统管理', icon: <SettingOutlined /> },
+  {
+    key: 'sys',
+    label: '系统管理',
+    icon: <SettingOutlined />,
+    children: [
+      { key: '/sys/user', label: '用户管理' },
+      { key: '/sys/role', label: '角色管理' },
+      { key: '/sys/org', label: '组织管理' },
+      { key: '/sys/menu', label: '菜单管理' },
+      { key: '/sys/config', label: '系统配置' },
+    ],
+  },
   { key: '/ai', label: 'AI（占位）', icon: <RobotOutlined /> },
 ];
+
+const SYS_PATH_PREFIX = '/sys/';
 
 /**
  * 应用主框架：左侧导航 + 顶栏标题 + 子路由出口。
@@ -42,17 +55,42 @@ export function MainLayout() {
 
   const items: MenuItem[] = useMemo(
     () =>
-      MENU_ITEMS.map((item) => ({
-        key: item.key,
-        icon: item.icon,
-        label: item.label,
-      })),
+      TOP_MENU.map((item) => {
+        if (item.children) {
+          return {
+            key: item.key,
+            icon: item.icon,
+            label: item.label,
+            children: item.children.map((child) => ({
+              key: child.key,
+              label: child.label,
+            })),
+          };
+        }
+        return {
+          key: item.key,
+          icon: item.icon,
+          label: item.label,
+        };
+      }),
     [],
   );
 
-  const selectedKey = useMemo(() => {
-    const match = MENU_ITEMS.find((item) => location.pathname.startsWith(item.key));
-    return match?.key ?? '/asset/list';
+  const selectedKeys = useMemo(() => {
+    if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
+      return [location.pathname];
+    }
+    const top = TOP_MENU.find(
+      (item) => !item.children && location.pathname.startsWith(item.key),
+    );
+    return top ? [top.key] : ['/asset/list'];
+  }, [location.pathname]);
+
+  const openKeys = useMemo(() => {
+    if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
+      return ['sys'];
+    }
+    return undefined;
   }, [location.pathname]);
 
   return (
@@ -74,9 +112,14 @@ export function MainLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[selectedKey]}
+          selectedKeys={selectedKeys}
+          defaultOpenKeys={openKeys}
           items={items}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            if (key.startsWith('/')) {
+              navigate(key);
+            }
+          }}
         />
       </Sider>
       <Layout>
