@@ -9,9 +9,11 @@ import { MainLayout } from './Layout/MainLayout';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { AssetListPage } from '../features/asset/AssetListPage';
 import { CatalogPage } from '../features/catalog/CatalogPage';
-import { ReviewPage } from '../features/review/ReviewPage';
-import { TranscodePage } from '../features/transcode/TranscodePage';
-import { AiPage } from '../features/ai/AiPage';
+import { AuditCenterPage } from '../features/workflow/pages/AuditCenterPage';
+import { WorkflowDefPage } from '../features/workflow/pages/WorkflowDefPage';
+import { TranscodeGroupPage } from '../features/transcode/pages/TranscodeGroupPage';
+import { TranscodeTaskPage } from '../features/transcode/pages/TranscodeTaskPage';
+import { AiPlaceholderPage } from '../features/ai/AiPlaceholderPage';
 import { UserListPage } from '../features/sys/user/pages/UserListPage';
 import { RoleListPage } from '../features/sys/role/pages/RoleListPage';
 import { OrgListPage } from '../features/sys/org/pages/OrgListPage';
@@ -39,15 +41,18 @@ export function buildRoutes(): RouteObject[] {
         { index: true, element: <Navigate to="/asset/list" replace /> },
         { path: 'asset/list', element: <AssetListPage /> },
         { path: 'catalog', element: <CatalogPage /> },
-        { path: 'review', element: <ReviewPage /> },
-        { path: 'transcode', element: <TranscodePage /> },
+        { path: 'review', element: <AuditCenterPage /> },
+        { path: 'workflow/def', element: <WorkflowDefPage /> },
+        { path: 'transcode', element: <Navigate to="/transcode/task" replace /> },
+        { path: 'transcode/group', element: <TranscodeGroupPage /> },
+        { path: 'transcode/task', element: <TranscodeTaskPage /> },
         { path: 'sys/user', element: <UserListPage /> },
         { path: 'sys/role', element: <RoleListPage /> },
         { path: 'sys/org', element: <OrgListPage /> },
         { path: 'sys/menu', element: <MenuListPage /> },
         { path: 'sys/config', element: <ConfigListPage /> },
         { path: 'system', element: <Navigate to="/sys/user" replace /> },
-        { path: 'ai', element: <AiPage /> },
+        { path: 'ai', element: <AiPlaceholderPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/asset/list" replace /> },

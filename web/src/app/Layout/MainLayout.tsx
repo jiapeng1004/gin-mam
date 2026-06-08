@@ -19,9 +19,23 @@ const { Header, Sider, Content } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-/** 侧栏顶级菜单（系统管理含子菜单） */
-const TOP_MENU: { key: string; label: string; icon: ReactNode; children?: { key: string; label: string }[] }[] = [
-  { key: '/asset/list', label: '媒资管理', icon: <VideoCameraOutlined /> },
+/** 侧栏顶级菜单（媒资、系统管理含子菜单） */
+const TOP_MENU: {
+  key: string;
+  label: string;
+  icon: ReactNode;
+  children?: { key: string; label: string }[];
+}[] = [
+  {
+    key: 'asset',
+    label: '媒资管理',
+    icon: <VideoCameraOutlined />,
+    children: [
+      { key: '/asset/list', label: '媒资列表' },
+      { key: '/asset/upload', label: '上传媒资' },
+      { key: '/asset/recycle', label: '回收站' },
+    ],
+  },
   { key: '/catalog', label: '编目', icon: <DatabaseOutlined /> },
   { key: '/review', label: '审核中心', icon: <AuditOutlined /> },
   { key: '/transcode', label: '转码', icon: <CloudUploadOutlined /> },
@@ -41,6 +55,7 @@ const TOP_MENU: { key: string; label: string; icon: ReactNode; children?: { key:
 ];
 
 const SYS_PATH_PREFIX = '/sys/';
+const ASSET_PATH_PREFIX = '/asset/';
 
 /**
  * 应用主框架：左侧导航 + 顶栏标题 + 子路由出口。
@@ -80,6 +95,18 @@ export function MainLayout() {
     if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
       return [location.pathname];
     }
+    if (location.pathname.startsWith(ASSET_PATH_PREFIX)) {
+      if (location.pathname.startsWith('/asset/list')) {
+        return ['/asset/list'];
+      }
+      if (location.pathname.startsWith('/asset/upload')) {
+        return ['/asset/upload'];
+      }
+      if (location.pathname.startsWith('/asset/recycle')) {
+        return ['/asset/recycle'];
+      }
+      return ['/asset/list'];
+    }
     const top = TOP_MENU.find(
       (item) => !item.children && location.pathname.startsWith(item.key),
     );
@@ -89,6 +116,9 @@ export function MainLayout() {
   const openKeys = useMemo(() => {
     if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
       return ['sys'];
+    }
+    if (location.pathname.startsWith(ASSET_PATH_PREFIX)) {
+      return ['asset'];
     }
     return undefined;
   }, [location.pathname]);
