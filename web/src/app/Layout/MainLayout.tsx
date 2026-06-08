@@ -19,26 +19,20 @@ const { Header, Sider, Content } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-/** 侧栏顶级菜单（媒资、系统管理含子菜单） */
-const TOP_MENU: {
-  key: string;
-  label: string;
-  icon: ReactNode;
-  children?: { key: string; label: string }[];
-}[] = [
-  {
-    key: 'asset',
-    label: '媒资管理',
-    icon: <VideoCameraOutlined />,
-    children: [
-      { key: '/asset/list', label: '媒资列表' },
-      { key: '/asset/upload', label: '上传媒资' },
-      { key: '/asset/recycle', label: '回收站' },
-    ],
-  },
+/** 侧栏顶级菜单（系统管理、转码含子菜单） */
+const TOP_MENU: { key: string; label: string; icon: ReactNode; children?: { key: string; label: string }[] }[] = [
+  { key: '/asset/list', label: '媒资管理', icon: <VideoCameraOutlined /> },
   { key: '/catalog', label: '编目', icon: <DatabaseOutlined /> },
   { key: '/review', label: '审核中心', icon: <AuditOutlined /> },
-  { key: '/transcode', label: '转码', icon: <CloudUploadOutlined /> },
+  {
+    key: 'transcode',
+    label: '转码',
+    icon: <CloudUploadOutlined />,
+    children: [
+      { key: '/transcode/group', label: '转码组' },
+      { key: '/transcode/task', label: '转码任务' },
+    ],
+  },
   {
     key: 'sys',
     label: '系统管理',
@@ -49,16 +43,18 @@ const TOP_MENU: {
       { key: '/sys/org', label: '组织管理' },
       { key: '/sys/menu', label: '菜单管理' },
       { key: '/sys/config', label: '系统配置' },
+      { key: '/workflow/def', label: '流程定义' },
     ],
   },
   { key: '/ai', label: 'AI（占位）', icon: <RobotOutlined /> },
 ];
 
 const SYS_PATH_PREFIX = '/sys/';
-const ASSET_PATH_PREFIX = '/asset/';
+const WORKFLOW_DEF_PATH = '/workflow/def';
+const TRANSCODE_PATH_PREFIX = '/transcode/';
 
 /**
- * 应用主框架：左侧导航 + 顶栏标题 + 子路由出口。
+ * 应用主框架：左侧导航 + 顶栏标题 + 子路由 outlet。
  * @returns MainLayout 结构
  */
 export function MainLayout() {
@@ -95,17 +91,11 @@ export function MainLayout() {
     if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
       return [location.pathname];
     }
-    if (location.pathname.startsWith(ASSET_PATH_PREFIX)) {
-      if (location.pathname.startsWith('/asset/list')) {
-        return ['/asset/list'];
-      }
-      if (location.pathname.startsWith('/asset/upload')) {
-        return ['/asset/upload'];
-      }
-      if (location.pathname.startsWith('/asset/recycle')) {
-        return ['/asset/recycle'];
-      }
-      return ['/asset/list'];
+    if (location.pathname === WORKFLOW_DEF_PATH) {
+      return [WORKFLOW_DEF_PATH];
+    }
+    if (location.pathname.startsWith(TRANSCODE_PATH_PREFIX)) {
+      return [location.pathname];
     }
     const top = TOP_MENU.find(
       (item) => !item.children && location.pathname.startsWith(item.key),
@@ -114,11 +104,11 @@ export function MainLayout() {
   }, [location.pathname]);
 
   const openKeys = useMemo(() => {
-    if (location.pathname.startsWith(SYS_PATH_PREFIX)) {
+    if (location.pathname.startsWith(SYS_PATH_PREFIX) || location.pathname === WORKFLOW_DEF_PATH) {
       return ['sys'];
     }
-    if (location.pathname.startsWith(ASSET_PATH_PREFIX)) {
-      return ['asset'];
+    if (location.pathname.startsWith(TRANSCODE_PATH_PREFIX)) {
+      return ['transcode'];
     }
     return undefined;
   }, [location.pathname]);

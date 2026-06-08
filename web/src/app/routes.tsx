@@ -7,8 +7,8 @@ import type { RouteObject } from 'react-router-dom';
 import { RequireAuth } from './RequireAuth';
 import { MainLayout } from './Layout/MainLayout';
 import { LoginPage } from '../features/auth/pages/LoginPage';
-import { AssetListPage } from '../features/asset/AssetListPage';
-import { CatalogPage } from '../features/catalog/CatalogPage';
+import { AssetListPage } from '../features/asset/pages/AssetListPage';
+import { CatalogTreePage } from '../features/catalog/pages/CatalogTreePage';
 import { AuditCenterPage } from '../features/workflow/pages/AuditCenterPage';
 import { WorkflowDefPage } from '../features/workflow/pages/WorkflowDefPage';
 import { TranscodeGroupPage } from '../features/transcode/pages/TranscodeGroupPage';
@@ -40,7 +40,7 @@ export function buildRoutes(): RouteObject[] {
       children: [
         { index: true, element: <Navigate to="/asset/list" replace /> },
         { path: 'asset/list', element: <AssetListPage /> },
-        { path: 'catalog', element: <CatalogPage /> },
+        { path: 'catalog', element: <CatalogTreePage /> },
         { path: 'review', element: <AuditCenterPage /> },
         { path: 'workflow/def', element: <WorkflowDefPage /> },
         { path: 'transcode', element: <Navigate to="/transcode/task" replace /> },
