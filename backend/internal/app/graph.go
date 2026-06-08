@@ -12,8 +12,11 @@ import (
 	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/domain/sys/model"
+	"github.com/gin-mam/backend/internal/domain/workflow"
+	workflowmodel "github.com/gin-mam/backend/internal/domain/workflow/model"
 	infraconfig "github.com/gin-mam/backend/internal/infra/config"
 	"github.com/gin-mam/backend/internal/infra/elasticsearch"
+	"github.com/gin-mam/backend/internal/infra/lock"
 	"github.com/gin-mam/backend/internal/infra/mysql"
 	redispkg "github.com/gin-mam/backend/internal/infra/redis"
 	"github.com/gin-mam/backend/internal/infra/storage"
@@ -23,24 +26,27 @@ import (
 )
 
 type Graph struct {
-	DB             *gorm.DB
-	Redis          *redis.Client
-	TxMgr          tx.Manager
-	ConfigSvc      infraconfig.Service
-	SysRepo        sys.Repository
-	SysSvc         sys.Service
-	SysHandler     *sys.Handler
-	AssetRepo      asset.Repository
-	AssetSvc       asset.Service
-	AssetHandler   *asset.Handler
-	CatalogRepo    catalog.Repository
-	CatalogSvc     catalog.Service
-	CatalogHandler *catalog.Handler
-	SearchSvc      search.Service
-	SearchHandler  *search.Handler
-	AssetUpload    asset.UploadService
-	ObjectStorage  storage.Storage
-	Router         *gin.Engine
+	DB               *gorm.DB
+	Redis            *redis.Client
+	TxMgr            tx.Manager
+	ConfigSvc        infraconfig.Service
+	SysRepo          sys.Repository
+	SysSvc           sys.Service
+	SysHandler       *sys.Handler
+	AssetRepo        asset.Repository
+	AssetSvc         asset.Service
+	AssetHandler     *asset.Handler
+	CatalogRepo      catalog.Repository
+	CatalogSvc       catalog.Service
+	CatalogHandler   *catalog.Handler
+	SearchSvc        search.Service
+	SearchHandler    *search.Handler
+	WorkflowRepo     workflow.Repository
+	WorkflowSvc      workflow.Service
+	WorkflowHandler  *workflow.Handler
+	AssetUpload      asset.UploadService
+	ObjectStorage    storage.Storage
+	Router           *gin.Engine
 }
 
 func Build(cfg *Config) (*Graph, error) {
@@ -64,6 +70,11 @@ func Build(cfg *Config) (*Graph, error) {
 		&assetmodel.AssetMetadata{},
 		&catalogmodel.Catalog{},
 		&catalogmodel.CatalogConfig{},
+		&workflowmodel.WorkflowDef{},
+		&workflowmodel.WorkflowLevelUser{},
+		&workflowmodel.WorkflowInstance{},
+		&workflowmodel.WorkflowInstanceLevelUser{},
+		&workflowmodel.WorkflowOperate{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
 	}
@@ -95,26 +106,33 @@ func Build(cfg *Config) (*Graph, error) {
 	catalogRepo := catalog.NewMySQLRepository(db)
 	catalogSvc := catalog.NewService(catalogRepo)
 	catalogHandler := catalog.NewHandler(catalogSvc)
-	router := NewRouter(sysHandler, assetHandler, catalogHandler, searchHandler, cfg.JWT.Secret)
+	workflowRepo := workflow.NewMySQLRepository(db)
+	workflowLocker := lock.NewRedisLocker(rdb)
+	workflowSvc := workflow.NewService(workflowRepo, assetRepo, assetSvc, txMgr, workflowLocker)
+	workflowHandler := workflow.NewHandler(workflowSvc)
+	router := NewRouter(sysHandler, assetHandler, catalogHandler, searchHandler, workflowHandler, cfg.JWT.Secret)
 
 	return &Graph{
-		DB:             db,
-		Redis:          rdb,
-		TxMgr:          txMgr,
-		ConfigSvc:      configSvc,
-		SysRepo:        sysRepo,
-		SysSvc:         sysSvc,
-		SysHandler:     sysHandler,
-		AssetRepo:      assetRepo,
-		AssetSvc:       assetSvc,
-		AssetHandler:   assetHandler,
-		AssetUpload:    assetUpload,
-		CatalogRepo:    catalogRepo,
-		CatalogSvc:     catalogSvc,
-		CatalogHandler: catalogHandler,
-		SearchSvc:      searchSvc,
-		SearchHandler:  searchHandler,
-		ObjectStorage:  objectStorage,
-		Router:         router,
+		DB:              db,
+		Redis:           rdb,
+		TxMgr:           txMgr,
+		ConfigSvc:       configSvc,
+		SysRepo:         sysRepo,
+		SysSvc:          sysSvc,
+		SysHandler:      sysHandler,
+		AssetRepo:       assetRepo,
+		AssetSvc:        assetSvc,
+		AssetHandler:    assetHandler,
+		AssetUpload:     assetUpload,
+		CatalogRepo:     catalogRepo,
+		CatalogSvc:      catalogSvc,
+		CatalogHandler:  catalogHandler,
+		SearchSvc:       searchSvc,
+		SearchHandler:   searchHandler,
+		WorkflowRepo:    workflowRepo,
+		WorkflowSvc:     workflowSvc,
+		WorkflowHandler: workflowHandler,
+		ObjectStorage:   objectStorage,
+		Router:          router,
 	}, nil
 }

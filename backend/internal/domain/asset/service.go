@@ -1,4 +1,4 @@
-package asset
+﻿package asset
 
 import (
 	"context"
@@ -25,6 +25,7 @@ type Service interface {
 	Create(ctx context.Context, in CreateInput) (*AssetVO, error)
 	Update(ctx context.Context, id string, in UpdateInput) (*AssetVO, error)
 	Delete(ctx context.Context, id string) error
+	UpdateStatus(ctx context.Context, id string, status int8) error
 }
 
 type PageInput struct {

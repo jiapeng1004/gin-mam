@@ -332,3 +332,18 @@ func (s *service) Delete(ctx context.Context, id string) error {
 		return nil
 	})
 }
+
+func (s *service) UpdateStatus(ctx context.Context, id string, status int8) error {
+	return s.txMgr.Run(ctx, tx.Required, func(ctx context.Context) error {
+		asset, err := s.repo.GetAssetByID(ctx, defaultTenant, id)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return s.notFound()
+			}
+			return err
+		}
+		asset.Status = status
+		asset.UpdatedAt = s.now()
+		return s.repo.UpdateAsset(ctx, asset)
+	})
+}

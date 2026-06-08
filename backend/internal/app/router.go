@@ -6,10 +6,11 @@ import (
 	"github.com/gin-mam/backend/internal/domain/catalog"
 	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
+	"github.com/gin-mam/backend/internal/domain/workflow"
 	"github.com/gin-mam/backend/internal/pkg/httpx"
 )
 
-func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, searchHandler *search.Handler, jwtSecret string) *gin.Engine {
+func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, searchHandler *search.Handler, workflowHandler *workflow.Handler, jwtSecret string) *gin.Engine {
 	r := gin.New()
 	r.Use(httpx.ErrorMiddleware(), gin.Logger())
 
@@ -38,6 +39,18 @@ func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHand
 	authed.POST("/asset/upload/complete", assetHandler.UploadComplete)
 
 	authed.POST("/search/asset", searchHandler.SearchAsset)
+
+	authed.POST("/asset-workflow/submit", workflowHandler.Submit)
+	authed.POST("/asset-workflow/audit", workflowHandler.Audit)
+	authed.POST("/asset-workflow/multi-audit", workflowHandler.MultiAudit)
+	authed.POST("/asset-workflow/revoke", workflowHandler.Revoke)
+	authed.POST("/asset-workflow/assigned-to-me", workflowHandler.AssignedToMe)
+	authed.POST("/asset-workflow/created-by-me", workflowHandler.CreatedByMe)
+	authed.POST("/asset-workflow/audited-by-me", workflowHandler.AuditedByMe)
+	authed.POST("/asset-workflow/all", workflowHandler.All)
+
+	authed.POST("/workflow/def/page", workflowHandler.DefPage)
+	authed.POST("/workflow/def", workflowHandler.CreateDef)
 
 	return r
 }
