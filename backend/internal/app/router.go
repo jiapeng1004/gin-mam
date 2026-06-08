@@ -6,16 +6,18 @@ import (
 	"github.com/gin-mam/backend/internal/domain/catalog"
 	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
+	"github.com/gin-mam/backend/internal/domain/transcode"
 	"github.com/gin-mam/backend/internal/domain/workflow"
 	"github.com/gin-mam/backend/internal/pkg/httpx"
 )
 
-func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, searchHandler *search.Handler, workflowHandler *workflow.Handler, jwtSecret string) *gin.Engine {
+func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHandler *catalog.Handler, searchHandler *search.Handler, workflowHandler *workflow.Handler, transcodeHandler *transcode.Handler, jwtSecret string) *gin.Engine {
 	r := gin.New()
 	r.Use(httpx.ErrorMiddleware(), gin.Logger())
 
 	v1 := r.Group("/api/v1")
 	v1.POST("/auth/login", sysHandler.Login)
+	v1.POST("/transcode/callback", transcodeHandler.Callback)
 
 	authed := v1.Group("")
 	authed.Use(httpx.JWTMiddleware(jwtSecret))
@@ -51,6 +53,14 @@ func NewRouter(sysHandler *sys.Handler, assetHandler *asset.Handler, catalogHand
 
 	authed.POST("/workflow/def/page", workflowHandler.DefPage)
 	authed.POST("/workflow/def", workflowHandler.CreateDef)
+
+	authed.POST("/transcode/group/page", transcodeHandler.GroupPage)
+	authed.POST("/transcode/group", transcodeHandler.CreateGroup)
+	authed.PUT("/transcode/group/:id", transcodeHandler.UpdateGroup)
+	authed.DELETE("/transcode/group/:id", transcodeHandler.DeleteGroup)
+	authed.POST("/transcode/task", transcodeHandler.CreateTask)
+	authed.GET("/transcode/task/:id", transcodeHandler.GetTask)
+	authed.POST("/transcode/task/page", transcodeHandler.TaskPage)
 
 	return r
 }

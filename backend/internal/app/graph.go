@@ -12,6 +12,9 @@ import (
 	"github.com/gin-mam/backend/internal/domain/search"
 	"github.com/gin-mam/backend/internal/domain/sys"
 	"github.com/gin-mam/backend/internal/domain/sys/model"
+	"github.com/gin-mam/backend/internal/domain/transcode"
+	transcodeclient "github.com/gin-mam/backend/internal/domain/transcode/client"
+	transcodemodel "github.com/gin-mam/backend/internal/domain/transcode/model"
 	"github.com/gin-mam/backend/internal/domain/workflow"
 	workflowmodel "github.com/gin-mam/backend/internal/domain/workflow/model"
 	infraconfig "github.com/gin-mam/backend/internal/infra/config"
@@ -44,6 +47,9 @@ type Graph struct {
 	WorkflowRepo     workflow.Repository
 	WorkflowSvc      workflow.Service
 	WorkflowHandler  *workflow.Handler
+	TranscodeRepo     transcode.Repository
+	TranscodeSvc      transcode.Service
+	TranscodeHandler  *transcode.Handler
 	AssetUpload      asset.UploadService
 	ObjectStorage    storage.Storage
 	Router           *gin.Engine
@@ -75,6 +81,9 @@ func Build(cfg *Config) (*Graph, error) {
 		&workflowmodel.WorkflowInstance{},
 		&workflowmodel.WorkflowInstanceLevelUser{},
 		&workflowmodel.WorkflowOperate{},
+		&transcodemodel.TranscodeGroup{},
+		&transcodemodel.TranscodeProfile{},
+		&transcodemodel.TranscodeTask{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
 	}
@@ -110,7 +119,11 @@ func Build(cfg *Config) (*Graph, error) {
 	workflowLocker := lock.NewRedisLocker(rdb)
 	workflowSvc := workflow.NewService(workflowRepo, assetRepo, assetSvc, txMgr, workflowLocker)
 	workflowHandler := workflow.NewHandler(workflowSvc)
-	router := NewRouter(sysHandler, assetHandler, catalogHandler, searchHandler, workflowHandler, cfg.JWT.Secret)
+	transcodeRepo := transcode.NewMySQLRepository(db)
+	transcodeClient := transcodeclient.NewHTTPClient()
+	transcodeSvc := transcode.NewService(transcodeRepo, configSvc, txMgr, transcodeClient)
+	transcodeHandler := transcode.NewHandler(transcodeSvc)
+	router := NewRouter(sysHandler, assetHandler, catalogHandler, searchHandler, workflowHandler, transcodeHandler, cfg.JWT.Secret)
 
 	return &Graph{
 		DB:              db,
@@ -132,6 +145,9 @@ func Build(cfg *Config) (*Graph, error) {
 		WorkflowRepo:    workflowRepo,
 		WorkflowSvc:     workflowSvc,
 		WorkflowHandler: workflowHandler,
+		TranscodeRepo:    transcodeRepo,
+		TranscodeSvc:     transcodeSvc,
+		TranscodeHandler: transcodeHandler,
 		ObjectStorage:   objectStorage,
 		Router:          router,
 	}, nil
