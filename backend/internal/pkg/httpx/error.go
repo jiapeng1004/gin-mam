@@ -1,8 +1,9 @@
 package httpx
 
+// ErrorVo 统一错误响应体（HTTP 4xx/5xx）。
 type ErrorVo struct {
-	ErrCode int    `json:"err_code"`
-	ErrMsg  string `json:"err_msg"`
+	ErrCode int    `json:"err_code" example:"40100"`
+	ErrMsg  string `json:"err_msg" example:"未授权"`
 }
 
 type BizError struct {

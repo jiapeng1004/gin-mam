@@ -37,7 +37,11 @@ docker compose up -d mysql redis elasticsearch
 cd backend
 go run ./cmd/server          # :8080，配置见 config.yaml
 make test
+make swagger               # 重新生成 docs/swagger.*
 ```
+
+- **Swagger UI**：http://localhost:8080/swagger/index.html
+- 修改 Handler 注解后执行 `make swagger` 更新文档
 
 默认账号：`admin` / `admin123`
 

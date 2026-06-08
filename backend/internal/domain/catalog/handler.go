@@ -18,11 +18,16 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-// Tree 获取完整编目树。
+// Tree 获取编目树
 //
-// 路由：GET /api/v1/catalog/tree
-// 鉴权：JWT Bearer
-// 成功：200 TreeNode[]（空树返回 []）
+//	@Summary		获取编目树
+//	@Description	返回完整多级编目树结构
+//	@Tags			编目
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{array}		TreeNode
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog/tree [get]
 func (h *Handler) Tree(c *gin.Context) {
 	result, err := h.svc.Tree(c.Request.Context())
 	if err != nil {
@@ -35,19 +40,25 @@ func (h *Handler) Tree(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// createRequest POST /api/v1/catalog 请求体。
+// createRequest 创建编目请求体。
 type createRequest struct {
-	Name     string  `json:"name" binding:"required"`
-	ParentID *string `json:"parentId"`
-	SortCode int     `json:"sortCode"`
+	Name     string  `json:"name" binding:"required" example:"新闻栏目"`
+	ParentID *string `json:"parentId" example:""`
+	SortCode int     `json:"sortCode" example:"0"`
 }
 
-// Create 创建编目节点。
+// Create 创建编目节点
 //
-// 路由：POST /api/v1/catalog
-// 鉴权：JWT Bearer
-// 请求体：{ name, parentId?, sortCode? }
-// 成功：201 CatalogVO
+//	@Summary		创建编目节点
+//	@Tags			编目
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		createRequest	true	"编目参数"
+//	@Success		201		{object}	CatalogVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req createRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,20 +77,27 @@ func (h *Handler) Create(c *gin.Context) {
 	httpx.Created(c, result)
 }
 
-// updateRequest PUT /api/v1/catalog/:id 请求体。
+// updateRequest 更新编目请求体。
 type updateRequest struct {
 	Name     *string `json:"name"`
 	ParentID *string `json:"parentId"`
 	SortCode *int    `json:"sortCode"`
 }
 
-// Update 更新编目节点。
+// Update 更新编目节点
 //
-// 路由：PUT /api/v1/catalog/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 请求体：{ name?, parentId?, sortCode? }（未传字段不修改）
-// 成功：200 CatalogVO
+//	@Summary		更新编目节点
+//	@Tags			编目
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		string			true	"编目 ID"
+//	@Param			body	body		updateRequest	true	"更新参数"
+//	@Success		200		{object}	CatalogVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Failure		404		{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var req updateRequest
@@ -99,12 +117,16 @@ func (h *Handler) Update(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// Delete 删除编目节点。
+// Delete 删除编目节点
 //
-// 路由：DELETE /api/v1/catalog/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 成功：204 无响应体
+//	@Summary		删除编目节点
+//	@Tags			编目
+//	@Security		BearerAuth
+//	@Param			id	path	string	true	"编目 ID"
+//	@Success		204
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -114,12 +136,17 @@ func (h *Handler) Delete(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// ListConfig 列出编目节点配置项。
+// ListConfig 列出编目配置
 //
-// 路由：GET /api/v1/catalog/:id/config
-// 鉴权：JWT Bearer
-// 路径参数：id（编目节点 ID）
-// 成功：200 ConfigVO[]
+//	@Summary		列出编目配置
+//	@Tags			编目
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id	path		string	true	"编目 ID"
+//	@Success		200	{array}		ConfigVO
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog/{id}/config [get]
 func (h *Handler) ListConfig(c *gin.Context) {
 	catalogID := c.Param("id")
 	result, err := h.svc.ListConfig(c.Request.Context(), catalogID)
@@ -133,7 +160,7 @@ func (h *Handler) ListConfig(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// batchConfigRequest PUT /api/v1/catalog/:id/config 请求体。
+// batchConfigRequest 批量更新编目配置请求体。
 type batchConfigRequest struct {
 	Items []struct {
 		ConfigKey   string `json:"configKey" binding:"required"`
@@ -141,13 +168,19 @@ type batchConfigRequest struct {
 	} `json:"items" binding:"required"`
 }
 
-// BatchUpdateConfig 批量更新编目节点配置。
+// BatchUpdateConfig 批量更新编目配置
 //
-// 路由：PUT /api/v1/catalog/:id/config
-// 鉴权：JWT Bearer
-// 路径参数：id（编目节点 ID）
-// 请求体：{ items: [{ configKey, configValue }] }
-// 成功：200 ConfigVO[]
+//	@Summary		批量更新编目配置
+//	@Tags			编目
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		string				true	"编目 ID"
+//	@Param			body	body		batchConfigRequest	true	"配置项列表"
+//	@Success		200		{array}		ConfigVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/catalog/{id}/config [put]
 func (h *Handler) BatchUpdateConfig(c *gin.Context) {
 	catalogID := c.Param("id")
 	var req batchConfigRequest

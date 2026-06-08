@@ -19,18 +19,52 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-// pageRequest 转码分页 POST 接口通用请求体。
+// pageRequest 转码分页请求体。
 type pageRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	Page     int `json:"page" example:"1"`
+	PageSize int `json:"pageSize" example:"20"`
 }
 
-// GroupPage 分页查询转码组列表。
+// createGroupRequest 创建转码组请求体。
+type createGroupRequest struct {
+	Name          string `json:"name" binding:"required"`
+	Message       string `json:"message"`
+	GroupType     int    `json:"groupType"`
+	Param         string `json:"param"`
+	StrategyType  int    `json:"strategyType"`
+	DefaultFlag   int8   `json:"defaultFlag"`
+	AvailableFlag int8   `json:"availableFlag"`
+}
+
+// updateGroupRequest 更新转码组请求体。
+type updateGroupRequest struct {
+	Name          *string `json:"name"`
+	Message       *string `json:"message"`
+	GroupType     *int    `json:"groupType"`
+	Param         *string `json:"param"`
+	StrategyType  *int    `json:"strategyType"`
+	DefaultFlag   *int8   `json:"defaultFlag"`
+	AvailableFlag *int8   `json:"availableFlag"`
+}
+
+// createTaskRequest 创建转码任务请求体。
+type createTaskRequest struct {
+	AssetID          string  `json:"assetId" binding:"required"`
+	AssetFileID      *string `json:"assetFileId"`
+	TranscodeGroupID string  `json:"transcodeGroupId" binding:"required"`
+}
+
+// GroupPage 转码组分页
 //
-// 路由：POST /api/v1/transcode/group/page
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		转码组分页
+//	@Tags			转码
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	GroupPageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/group/page [post]
 func (h *Handler) GroupPage(c *gin.Context) {
 	var req pageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -45,22 +79,20 @@ func (h *Handler) GroupPage(c *gin.Context) {
 	httpx.OK(c, out)
 }
 
-// CreateGroup 创建转码组。
+// CreateGroup 创建转码组
 //
-// 路由：POST /api/v1/transcode/group
-// 鉴权：JWT Bearer
-// 请求体：{ name, message?, groupType?, param?, strategyType?, defaultFlag?, availableFlag? }
-// 成功：201 GroupVO
+//	@Summary		创建转码组
+//	@Tags			转码
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		createGroupRequest	true	"转码组参数"
+//	@Success		201		{object}	GroupVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/group [post]
 func (h *Handler) CreateGroup(c *gin.Context) {
-	var req struct {
-		Name          string `json:"name" binding:"required"`
-		Message       string `json:"message"`
-		GroupType     int    `json:"groupType"`
-		Param         string `json:"param"`
-		StrategyType  int    `json:"strategyType"`
-		DefaultFlag   int8   `json:"defaultFlag"`
-		AvailableFlag int8   `json:"availableFlag"`
-	}
+	var req createGroupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -81,25 +113,23 @@ func (h *Handler) CreateGroup(c *gin.Context) {
 	httpx.Created(c, out)
 }
 
-// UpdateGroup 更新转码组。
+// UpdateGroup 更新转码组
 //
-// 路由：PUT /api/v1/transcode/group/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 请求体：各字段可选，未传不修改
-// 成功：200 GroupVO
-// 失败：404 { err_code: 40403 }
+//	@Summary		更新转码组
+//	@Tags			转码
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		string				true	"转码组 ID"
+//	@Param			body	body		updateGroupRequest	true	"更新参数"
+//	@Success		200		{object}	GroupVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Failure		404		{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/group/{id} [put]
 func (h *Handler) UpdateGroup(c *gin.Context) {
 	id := c.Param("id")
-	var req struct {
-		Name          *string `json:"name"`
-		Message       *string `json:"message"`
-		GroupType     *int    `json:"groupType"`
-		Param         *string `json:"param"`
-		StrategyType  *int    `json:"strategyType"`
-		DefaultFlag   *int8   `json:"defaultFlag"`
-		AvailableFlag *int8   `json:"availableFlag"`
-	}
+	var req updateGroupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -120,12 +150,16 @@ func (h *Handler) UpdateGroup(c *gin.Context) {
 	httpx.OK(c, out)
 }
 
-// DeleteGroup 删除转码组。
+// DeleteGroup 删除转码组
 //
-// 路由：DELETE /api/v1/transcode/group/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 成功：204 无响应体
+//	@Summary		删除转码组
+//	@Tags			转码
+//	@Security		BearerAuth
+//	@Param			id	path	string	true	"转码组 ID"
+//	@Success		204
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/group/{id} [delete]
 func (h *Handler) DeleteGroup(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.svc.DeleteGroup(c.Request.Context(), id); err != nil {
@@ -135,18 +169,21 @@ func (h *Handler) DeleteGroup(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// CreateTask 创建转码任务并提交外部转码服务。
+// CreateTask 创建转码任务
 //
-// 路由：POST /api/v1/transcode/task
-// 鉴权：JWT Bearer
-// 请求体：{ assetId, assetFileId?, transcodeGroupId }
-// 成功：201 TaskVO
+//	@Summary		创建转码任务
+//	@Description	创建任务并提交外部转码服务
+//	@Tags			转码
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		createTaskRequest	true	"任务参数"
+//	@Success		201		{object}	TaskVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/task [post]
 func (h *Handler) CreateTask(c *gin.Context) {
-	var req struct {
-		AssetID          string  `json:"assetId" binding:"required"`
-		AssetFileID      *string `json:"assetFileId"`
-		TranscodeGroupID string  `json:"transcodeGroupId" binding:"required"`
-	}
+	var req createTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -163,13 +200,17 @@ func (h *Handler) CreateTask(c *gin.Context) {
 	httpx.Created(c, out)
 }
 
-// GetTask 按 ID 获取转码任务详情。
+// GetTask 获取转码任务
 //
-// 路由：GET /api/v1/transcode/task/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 成功：200 TaskVO
-// 失败：404 { err_code: 40403 }
+//	@Summary		获取转码任务
+//	@Tags			转码
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id	path		string	true	"任务 ID"
+//	@Success		200	{object}	TaskVO
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/task/{id} [get]
 func (h *Handler) GetTask(c *gin.Context) {
 	id := c.Param("id")
 	out, err := h.svc.GetTask(c.Request.Context(), id)
@@ -180,12 +221,17 @@ func (h *Handler) GetTask(c *gin.Context) {
 	httpx.OK(c, out)
 }
 
-// TaskPage 分页查询转码任务列表。
+// TaskPage 转码任务分页
 //
-// 路由：POST /api/v1/transcode/task/page
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		转码任务分页
+//	@Tags			转码
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	TaskPageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/task/page [post]
 func (h *Handler) TaskPage(c *gin.Context) {
 	var req pageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -200,13 +246,18 @@ func (h *Handler) TaskPage(c *gin.Context) {
 	httpx.OK(c, out)
 }
 
-// Callback 接收外部转码服务 HMAC 签名回调。
+// Callback 转码回调
 //
-// 路由：POST /api/v1/transcode/callback
-// 鉴权：无 JWT；校验请求头 X-Transcode-Sign
-// 请求体：原始 JSON（taskId、status、outputPath、errorMsg）
-// 成功：204 无响应体
-// 失败：403 { err_code: 40300 } 签名校验失败
+//	@Summary		转码回调
+//	@Description	外部转码服务 HMAC 签名回调，无需 JWT
+//	@Tags			转码
+//	@Accept			json
+//	@Param			X-Transcode-Sign	header		string			true	"HMAC 签名"
+//	@Param			body				body		CallbackInput	true	"回调体"
+//	@Success		204
+//	@Failure		400	{object}	httpx.ErrorVo
+//	@Failure		403	{object}	httpx.ErrorVo
+//	@Router			/api/v1/transcode/callback [post]
 func (h *Handler) Callback(c *gin.Context) {
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {

@@ -1,3 +1,14 @@
+// GIN-MAM 媒资管理系统 HTTP 服务入口。
+//
+//	@title						GIN-MAM API
+//	@version					1.0
+//	@description				媒资管理系统 REST API。成功响应直接返回业务 JSON（camelCase）；失败返回 { err_code, err_msg }。
+//	@host						localhost:8080
+//	@BasePath					/
+//	@securityDefinitions.apikey	BearerAuth
+//	@in							header
+//	@name						Authorization
+//	@description				JWT Bearer Token，格式：Bearer {token}
 package main
 
 import (
@@ -8,6 +19,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-mam/backend/internal/app"
+
+	_ "github.com/gin-mam/backend/docs" // swagger 生成文档
 )
 
 func main() {

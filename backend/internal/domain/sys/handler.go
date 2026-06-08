@@ -9,7 +9,7 @@ import (
 	"github.com/gin-mam/backend/internal/pkg/httpx"
 )
 
-// Handler 系统管理 HTTP 处理器，将 Gin 请求委托给 Service。
+// Handler 系统管理 HTTP 处理器。
 type Handler struct {
 	svc Service
 }
@@ -19,19 +19,24 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-// loginRequest POST /api/v1/auth/login 请求体。
+// loginRequest 登录请求体。
 type loginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required" example:"admin"`
+	Password string `json:"password" binding:"required" example:"admin123"`
 }
 
-// Login 用户登录。
+// Login 用户登录
 //
-// 路由：POST /api/v1/auth/login
-// 鉴权：无
-// 请求体：{ username, password }
-// 成功：200 { token, expiresAt }
-// 失败：401 { err_code: 40100, err_msg }
+//	@Summary		用户登录
+//	@Description	用户名密码登录，返回 JWT Token
+//	@Tags			认证
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		loginRequest	true	"登录参数"
+//	@Success		200		{object}	LoginResult
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,12 +55,18 @@ func (h *Handler) Login(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// UserPage 分页查询用户列表。
+// UserPage 分页查询用户
 //
-// 路由：GET /api/v1/sys/user/page
-// 鉴权：JWT Bearer
-// 查询参数：page（默认 1）、pageSize（默认 20）
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		分页查询用户
+//	@Description	获取系统用户分页列表
+//	@Tags			系统用户
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			page		query		int	false	"页码"	default(1)
+//	@Param			pageSize	query		int	false	"每页条数"	default(20)
+//	@Success		200			{object}	UserPageResult
+//	@Failure		401			{object}	httpx.ErrorVo
+//	@Router			/api/v1/sys/user/page [get]
 func (h *Handler) UserPage(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "20"))

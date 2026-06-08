@@ -1,0 +1,1700 @@
+basePath: /
+definitions:
+  github_com_gin-mam_backend_internal_domain_asset.AssetVO:
+    properties:
+      catalogId:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      previewUrl:
+        type: string
+      status:
+        type: integer
+      storagePath:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_gin-mam_backend_internal_domain_asset.PageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/github_com_gin-mam_backend_internal_domain_asset.AssetVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo:
+    properties:
+      err_code:
+        example: 40100
+        type: integer
+      err_msg:
+        example: 未授权
+        type: string
+    type: object
+  internal_domain_asset.AssetVO:
+    properties:
+      catalogId:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      previewUrl:
+        type: string
+      status:
+        type: integer
+      storagePath:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  internal_domain_asset.PageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_asset.AssetVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_asset.UploadInitResult:
+    properties:
+      chunkSize:
+        type: integer
+      uploadId:
+        type: string
+    type: object
+  internal_domain_asset.createRequest:
+    properties:
+      catalogId:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      fileSize:
+        type: integer
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      mimeType:
+        type: string
+      storagePath:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    required:
+    - storagePath
+    - title
+    - type
+    type: object
+  internal_domain_asset.pageRequest:
+    properties:
+      keyword:
+        example: ""
+        type: string
+      page:
+        example: 1
+        type: integer
+      pageSize:
+        example: 20
+        type: integer
+    type: object
+  internal_domain_asset.updateRequest:
+    properties:
+      catalogId:
+        type: string
+      description:
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      status:
+        type: integer
+      title:
+        type: string
+    type: object
+  internal_domain_asset.uploadCompleteRequest:
+    properties:
+      assetTitle:
+        type: string
+      catalogId:
+        type: string
+      type:
+        type: string
+      uploadId:
+        type: string
+    required:
+    - assetTitle
+    - type
+    - uploadId
+    type: object
+  internal_domain_asset.uploadInitRequest:
+    properties:
+      chunkSize:
+        type: integer
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      mimeType:
+        type: string
+    required:
+    - fileName
+    - fileSize
+    type: object
+  internal_domain_catalog.CatalogVO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      parentId:
+        type: string
+      sortCode:
+        type: integer
+    type: object
+  internal_domain_catalog.ConfigVO:
+    properties:
+      configKey:
+        type: string
+      configValue:
+        type: string
+      id:
+        type: string
+    type: object
+  internal_domain_catalog.TreeNode:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/internal_domain_catalog.TreeNode'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      parentId:
+        type: string
+    type: object
+  internal_domain_catalog.batchConfigRequest:
+    properties:
+      items:
+        items:
+          properties:
+            configKey:
+              type: string
+            configValue:
+              type: string
+          required:
+          - configKey
+          type: object
+        type: array
+    required:
+    - items
+    type: object
+  internal_domain_catalog.createRequest:
+    properties:
+      name:
+        example: 新闻栏目
+        type: string
+      parentId:
+        example: ""
+        type: string
+      sortCode:
+        example: 0
+        type: integer
+    required:
+    - name
+    type: object
+  internal_domain_catalog.updateRequest:
+    properties:
+      name:
+        type: string
+      parentId:
+        type: string
+      sortCode:
+        type: integer
+    type: object
+  internal_domain_search.searchAssetRequest:
+    properties:
+      catalogId:
+        example: ""
+        type: string
+      keyword:
+        example: 宣传片
+        type: string
+      page:
+        example: 1
+        type: integer
+      pageSize:
+        example: 20
+        type: integer
+      type:
+        example: video
+        type: string
+    type: object
+  internal_domain_sys.LoginResult:
+    properties:
+      expiresAt:
+        type: string
+      token:
+        type: string
+    type: object
+  internal_domain_sys.UserPageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_sys.UserVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_sys.UserVO:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      nickname:
+        type: string
+      orgId:
+        type: string
+      status:
+        type: integer
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_domain_sys.loginRequest:
+    properties:
+      password:
+        example: admin123
+        type: string
+      username:
+        example: admin
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_domain_transcode.CallbackInput:
+    properties:
+      errorMsg:
+        type: string
+      outputPath:
+        type: string
+      status:
+        type: integer
+      taskId:
+        type: string
+    type: object
+  internal_domain_transcode.GroupPageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_transcode.GroupVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_transcode.GroupVO:
+    properties:
+      availableFlag:
+        type: integer
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      defaultFlag:
+        type: integer
+      groupType:
+        type: integer
+      id:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      param:
+        type: string
+      strategyType:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  internal_domain_transcode.TaskPageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_transcode.TaskVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_transcode.TaskVO:
+    properties:
+      assetFileId:
+        type: string
+      assetId:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      errorMsg:
+        type: string
+      externalJobId:
+        type: string
+      id:
+        type: string
+      outputPath:
+        type: string
+      profileId:
+        type: string
+      status:
+        type: integer
+      transcodeGroupId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  internal_domain_transcode.createGroupRequest:
+    properties:
+      availableFlag:
+        type: integer
+      defaultFlag:
+        type: integer
+      groupType:
+        type: integer
+      message:
+        type: string
+      name:
+        type: string
+      param:
+        type: string
+      strategyType:
+        type: integer
+    required:
+    - name
+    type: object
+  internal_domain_transcode.createTaskRequest:
+    properties:
+      assetFileId:
+        type: string
+      assetId:
+        type: string
+      transcodeGroupId:
+        type: string
+    required:
+    - assetId
+    - transcodeGroupId
+    type: object
+  internal_domain_transcode.pageRequest:
+    properties:
+      page:
+        example: 1
+        type: integer
+      pageSize:
+        example: 20
+        type: integer
+    type: object
+  internal_domain_transcode.updateGroupRequest:
+    properties:
+      availableFlag:
+        type: integer
+      defaultFlag:
+        type: integer
+      groupType:
+        type: integer
+      message:
+        type: string
+      name:
+        type: string
+      param:
+        type: string
+      strategyType:
+        type: integer
+    type: object
+  internal_domain_workflow.DefLevelUserVO:
+    properties:
+      level:
+        type: integer
+      userId:
+        type: string
+    type: object
+  internal_domain_workflow.DefPageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_workflow.DefVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_workflow.DefVO:
+    properties:
+      auditLevel:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: string
+      levelUsers:
+        items:
+          $ref: '#/definitions/internal_domain_workflow.DefLevelUserVO'
+        type: array
+      name:
+        type: string
+      status:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  internal_domain_workflow.InstanceVO:
+    properties:
+      assetId:
+        type: string
+      auditLevel:
+        type: integer
+      auditStatus:
+        type: integer
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      id:
+        type: string
+      level:
+        type: integer
+      updatedAt:
+        type: string
+      workflowDefId:
+        type: string
+    type: object
+  internal_domain_workflow.PageResult:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/internal_domain_workflow.InstanceVO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  internal_domain_workflow.auditItem:
+    properties:
+      instanceId:
+        type: string
+      pass:
+        type: boolean
+      remark:
+        type: string
+    required:
+    - instanceId
+    type: object
+  internal_domain_workflow.auditRequest:
+    properties:
+      instanceId:
+        type: string
+      pass:
+        type: boolean
+      remark:
+        type: string
+    required:
+    - instanceId
+    type: object
+  internal_domain_workflow.createDefRequest:
+    properties:
+      auditLevel:
+        type: integer
+      levelUsers:
+        items:
+          $ref: '#/definitions/internal_domain_workflow.levelUserItem'
+        type: array
+      name:
+        type: string
+    required:
+    - auditLevel
+    - name
+    type: object
+  internal_domain_workflow.levelUserItem:
+    properties:
+      level:
+        type: integer
+      userId:
+        type: string
+    required:
+    - level
+    - userId
+    type: object
+  internal_domain_workflow.multiAuditRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/internal_domain_workflow.auditItem'
+        type: array
+    required:
+    - items
+    type: object
+  internal_domain_workflow.pageRequest:
+    properties:
+      page:
+        example: 1
+        type: integer
+      pageSize:
+        example: 20
+        type: integer
+    type: object
+  internal_domain_workflow.revokeRequest:
+    properties:
+      instanceIds:
+        items:
+          type: string
+        type: array
+    required:
+    - instanceIds
+    type: object
+  internal_domain_workflow.submitRequest:
+    properties:
+      assetId:
+        type: string
+      workflowDefId:
+        type: string
+    required:
+    - assetId
+    - workflowDefId
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 媒资管理系统 REST API。成功响应直接返回业务 JSON（camelCase）；失败返回 { err_code, err_msg
+    }。
+  title: GIN-MAM API
+  version: "1.0"
+paths:
+  /api/v1/asset:
+    post:
+      consumes:
+      - application/json
+      description: 直接创建媒资（已有 storagePath，非分片上传流程）
+      parameters:
+      - description: 媒资参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_asset.createRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_asset.AssetVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 创建媒资
+      tags:
+      - 媒资
+  /api/v1/asset-workflow/all:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.PageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 全部审核实例
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/assigned-to-me:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.PageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 待我审核列表
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/audit:
+    post:
+      consumes:
+      - application/json
+      description: 对单个流程实例执行通过或打回
+      parameters:
+      - description: 审核参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.auditRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 审核实例
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/audited-by-me:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.PageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 我审过的
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/created-by-me:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.PageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 我发起的审核
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/multi-audit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 批量审核参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.multiAuditRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 批量审核
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/revoke:
+    post:
+      consumes:
+      - application/json
+      description: 撤回本人发起的未完成审核实例
+      parameters:
+      - description: 实例 ID 列表
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.revokeRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 撤回审核
+      tags:
+      - 工作流
+  /api/v1/asset-workflow/submit:
+    post:
+      consumes:
+      - application/json
+      description: 将媒资提交至指定流程定义，创建审核实例
+      parameters:
+      - description: 提交参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.submitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.InstanceVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 提交审核
+      tags:
+      - 工作流
+  /api/v1/asset/{id}:
+    delete:
+      description: 软删除媒资（GORM DeletedAt）
+      parameters:
+      - description: 媒资 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 删除媒资
+      tags:
+      - 媒资
+    get:
+      parameters:
+      - description: 媒资 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_asset.AssetVO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 获取媒资详情
+      tags:
+      - 媒资
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 媒资 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_asset.updateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_asset.AssetVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 更新媒资
+      tags:
+      - 媒资
+  /api/v1/asset/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_asset.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_asset.PageResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 分页查询媒资
+      tags:
+      - 媒资
+  /api/v1/asset/upload/chunk:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 上传会话 ID
+        in: formData
+        name: uploadId
+        required: true
+        type: string
+      - description: 分片序号（从 0 开始）
+        in: formData
+        name: chunkIndex
+        required: true
+        type: integer
+      - description: 分片二进制
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 上传分片
+      tags:
+      - 媒资上传
+  /api/v1/asset/upload/complete:
+    post:
+      consumes:
+      - application/json
+      description: 合并分片、上传对象存储并创建媒资记录
+      parameters:
+      - description: 完成参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_asset.uploadCompleteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_asset.AssetVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 完成分片上传
+      tags:
+      - 媒资上传
+  /api/v1/asset/upload/init:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 文件信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_asset.uploadInitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_asset.UploadInitResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 初始化分片上传
+      tags:
+      - 媒资上传
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户名密码登录，返回 JWT Token
+      parameters:
+      - description: 登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_sys.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_sys.LoginResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      summary: 用户登录
+      tags:
+      - 认证
+  /api/v1/catalog:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 编目参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_catalog.createRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_catalog.CatalogVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 创建编目节点
+      tags:
+      - 编目
+  /api/v1/catalog/{id}:
+    delete:
+      parameters:
+      - description: 编目 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 删除编目节点
+      tags:
+      - 编目
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 编目 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_catalog.updateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_catalog.CatalogVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 更新编目节点
+      tags:
+      - 编目
+  /api/v1/catalog/{id}/config:
+    get:
+      parameters:
+      - description: 编目 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_domain_catalog.ConfigVO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 列出编目配置
+      tags:
+      - 编目
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 编目 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 配置项列表
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_catalog.batchConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_domain_catalog.ConfigVO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 批量更新编目配置
+      tags:
+      - 编目
+  /api/v1/catalog/tree:
+    get:
+      description: 返回完整多级编目树结构
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_domain_catalog.TreeNode'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 获取编目树
+      tags:
+      - 编目
+  /api/v1/search/asset:
+    post:
+      consumes:
+      - application/json
+      description: 基于 Elasticsearch 全文检索媒资，命中后回源拼装 AssetVO
+      parameters:
+      - description: 检索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_search.searchAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_domain_asset.PageResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 检索媒资
+      tags:
+      - 检索
+  /api/v1/sys/user/page:
+    get:
+      description: 获取系统用户分页列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_sys.UserPageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 分页查询用户
+      tags:
+      - 系统用户
+  /api/v1/transcode/callback:
+    post:
+      consumes:
+      - application/json
+      description: 外部转码服务 HMAC 签名回调，无需 JWT
+      parameters:
+      - description: HMAC 签名
+        in: header
+        name: X-Transcode-Sign
+        required: true
+        type: string
+      - description: 回调体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.CallbackInput'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      summary: 转码回调
+      tags:
+      - 转码
+  /api/v1/transcode/group:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 转码组参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.createGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.GroupVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 创建转码组
+      tags:
+      - 转码
+  /api/v1/transcode/group/{id}:
+    delete:
+      parameters:
+      - description: 转码组 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 删除转码组
+      tags:
+      - 转码
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 转码组 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.updateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.GroupVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 更新转码组
+      tags:
+      - 转码
+  /api/v1/transcode/group/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.GroupPageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 转码组分页
+      tags:
+      - 转码
+  /api/v1/transcode/task:
+    post:
+      consumes:
+      - application/json
+      description: 创建任务并提交外部转码服务
+      parameters:
+      - description: 任务参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.createTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.TaskVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 创建转码任务
+      tags:
+      - 转码
+  /api/v1/transcode/task/{id}:
+    get:
+      parameters:
+      - description: 任务 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.TaskVO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 获取转码任务
+      tags:
+      - 转码
+  /api/v1/transcode/task/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_transcode.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_transcode.TaskPageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 转码任务分页
+      tags:
+      - 转码
+  /api/v1/workflow/def:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 流程定义
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.createDefRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.DefVO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 创建流程定义
+      tags:
+      - 工作流定义
+  /api/v1/workflow/def/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_domain_workflow.pageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_domain_workflow.DefPageResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_gin-mam_backend_internal_pkg_httpx.ErrorVo'
+      security:
+      - BearerAuth: []
+      summary: 流程定义分页
+      tags:
+      - 工作流定义
+securityDefinitions:
+  BearerAuth:
+    description: JWT Bearer Token，格式：Bearer {token}
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

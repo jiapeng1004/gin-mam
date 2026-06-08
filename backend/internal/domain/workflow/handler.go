@@ -18,23 +18,70 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-// pageRequest 工作流分页类 POST 接口通用请求体。
+// pageRequest 工作流分页请求体。
 type pageRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	Page     int `json:"page" example:"1"`
+	PageSize int `json:"pageSize" example:"20"`
 }
 
-// Submit 提交媒资进入审核流程。
+// submitRequest 提交审核请求体。
+type submitRequest struct {
+	AssetID       string `json:"assetId" binding:"required"`
+	WorkflowDefID string `json:"workflowDefId" binding:"required"`
+}
+
+// auditRequest 单条审核请求体。
+type auditRequest struct {
+	InstanceID string `json:"instanceId" binding:"required"`
+	Pass       bool   `json:"pass"`
+	Remark     string `json:"remark"`
+}
+
+// auditItem 批量审核单项。
+type auditItem struct {
+	InstanceID string `json:"instanceId" binding:"required"`
+	Pass       bool   `json:"pass"`
+	Remark     string `json:"remark"`
+}
+
+// multiAuditRequest 批量审核请求体。
+type multiAuditRequest struct {
+	Items []auditItem `json:"items" binding:"required"`
+}
+
+// revokeRequest 撤回审核请求体。
+type revokeRequest struct {
+	InstanceIDs []string `json:"instanceIds" binding:"required"`
+}
+
+// levelUserItem 流程定义层级审核人。
+type levelUserItem struct {
+	Level  int    `json:"level" binding:"required"`
+	UserID string `json:"userId" binding:"required"`
+}
+
+// createDefRequest 创建流程定义请求体。
+type createDefRequest struct {
+	Name       string          `json:"name" binding:"required"`
+	AuditLevel int             `json:"auditLevel" binding:"required"`
+	LevelUsers []levelUserItem `json:"levelUsers"`
+}
+
+// Submit 提交审核
 //
-// 路由：POST /api/v1/asset-workflow/submit
-// 鉴权：JWT Bearer
-// 请求体：{ assetId, workflowDefId }
-// 成功：201 InstanceVO
+//	@Summary		提交审核
+//	@Description	将媒资提交至指定流程定义，创建审核实例
+//	@Tags			工作流
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		submitRequest	true	"提交参数"
+//	@Success		201		{object}	InstanceVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/submit [post]
 func (h *Handler) Submit(c *gin.Context) {
-	var req struct {
-		AssetID       string `json:"assetId" binding:"required"`
-		WorkflowDefID string `json:"workflowDefId" binding:"required"`
-	}
+	var req submitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -50,19 +97,22 @@ func (h *Handler) Submit(c *gin.Context) {
 	httpx.Created(c, out)
 }
 
-// Audit 对单个流程实例执行通过或打回。
+// Audit 审核实例
 //
-// 路由：POST /api/v1/asset-workflow/audit
-// 鉴权：JWT Bearer（须为当前层级审核人）
-// 请求体：{ instanceId, pass, remark? }
-// 成功：204 无响应体
-// 失败：403 无权审核、409 工作流锁定
+//	@Summary		审核实例
+//	@Description	对单个流程实例执行通过或打回
+//	@Tags			工作流
+//	@Accept			json
+//	@Security		BearerAuth
+//	@Param			body	body	auditRequest	true	"审核参数"
+//	@Success		204
+//	@Failure		400	{object}	httpx.ErrorVo
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		403	{object}	httpx.ErrorVo
+//	@Failure		409	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/audit [post]
 func (h *Handler) Audit(c *gin.Context) {
-	var req struct {
-		InstanceID string `json:"instanceId" binding:"required"`
-		Pass       bool   `json:"pass"`
-		Remark     string `json:"remark"`
-	}
+	var req auditRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -78,20 +128,19 @@ func (h *Handler) Audit(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// MultiAudit 批量审核多个流程实例。
+// MultiAudit 批量审核
 //
-// 路由：POST /api/v1/asset-workflow/multi-audit
-// 鉴权：JWT Bearer
-// 请求体：{ items: [{ instanceId, pass, remark? }] }
-// 成功：204 无响应体
+//	@Summary		批量审核
+//	@Tags			工作流
+//	@Accept			json
+//	@Security		BearerAuth
+//	@Param			body	body	multiAuditRequest	true	"批量审核参数"
+//	@Success		204
+//	@Failure		400	{object}	httpx.ErrorVo
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/multi-audit [post]
 func (h *Handler) MultiAudit(c *gin.Context) {
-	var req struct {
-		Items []struct {
-			InstanceID string `json:"instanceId" binding:"required"`
-			Pass       bool   `json:"pass"`
-			Remark     string `json:"remark"`
-		} `json:"items" binding:"required"`
-	}
+	var req multiAuditRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -107,16 +156,20 @@ func (h *Handler) MultiAudit(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// Revoke 撤回本人发起的未完成审核实例。
+// Revoke 撤回审核
 //
-// 路由：POST /api/v1/asset-workflow/revoke
-// 鉴权：JWT Bearer
-// 请求体：{ instanceIds: string[] }
-// 成功：204 无响应体
+//	@Summary		撤回审核
+//	@Description	撤回本人发起的未完成审核实例
+//	@Tags			工作流
+//	@Accept			json
+//	@Security		BearerAuth
+//	@Param			body	body	revokeRequest	true	"实例 ID 列表"
+//	@Success		204
+//	@Failure		400	{object}	httpx.ErrorVo
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/revoke [post]
 func (h *Handler) Revoke(c *gin.Context) {
-	var req struct {
-		InstanceIDs []string `json:"instanceIds" binding:"required"`
-	}
+	var req revokeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -128,7 +181,6 @@ func (h *Handler) Revoke(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// postPage 工作流分页 POST 接口通用处理：解析 page/pageSize 并委托查询函数。
 func (h *Handler) postPage(c *gin.Context, fn func(ctx *gin.Context, page, pageSize int) (any, error)) {
 	var req pageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -143,69 +195,88 @@ func (h *Handler) postPage(c *gin.Context, fn func(ctx *gin.Context, page, pageS
 	httpx.OK(c, out)
 }
 
-// AssignedToMe 分页查询待当前用户审核的实例。
+// AssignedToMe 待我审核列表
 //
-// 路由：POST /api/v1/asset-workflow/assigned-to-me
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		待我审核列表
+//	@Tags			工作流
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	PageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/assigned-to-me [post]
 func (h *Handler) AssignedToMe(c *gin.Context) {
 	h.postPage(c, func(c *gin.Context, page, pageSize int) (any, error) {
 		return h.svc.ListAssignedToMe(c.Request.Context(), httpx.GetUserID(c), page, pageSize)
 	})
 }
 
-// CreatedByMe 分页查询当前用户发起的审核实例。
+// CreatedByMe 我发起的审核
 //
-// 路由：POST /api/v1/asset-workflow/created-by-me
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		我发起的审核
+//	@Tags			工作流
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	PageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/created-by-me [post]
 func (h *Handler) CreatedByMe(c *gin.Context) {
 	h.postPage(c, func(c *gin.Context, page, pageSize int) (any, error) {
 		return h.svc.ListCreatedByMe(c.Request.Context(), httpx.GetUserID(c), page, pageSize)
 	})
 }
 
-// AuditedByMe 分页查询当前用户已审核过的实例。
+// AuditedByMe 我审过的
 //
-// 路由：POST /api/v1/asset-workflow/audited-by-me
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		我审过的
+//	@Tags			工作流
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	PageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/audited-by-me [post]
 func (h *Handler) AuditedByMe(c *gin.Context) {
 	h.postPage(c, func(c *gin.Context, page, pageSize int) (any, error) {
 		return h.svc.ListAuditedByMe(c.Request.Context(), httpx.GetUserID(c), page, pageSize)
 	})
 }
 
-// All 分页查询全部审核实例（管理视角）。
+// All 全部审核实例
 //
-// 路由：POST /api/v1/asset-workflow/all
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		全部审核实例
+//	@Tags			工作流
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	PageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset-workflow/all [post]
 func (h *Handler) All(c *gin.Context) {
 	h.postPage(c, func(c *gin.Context, page, pageSize int) (any, error) {
 		return h.svc.ListAll(c.Request.Context(), page, pageSize)
 	})
 }
 
-// CreateDef 创建审核流程定义。
+// CreateDef 创建流程定义
 //
-// 路由：POST /api/v1/workflow/def
-// 鉴权：JWT Bearer
-// 请求体：{ name, auditLevel, levelUsers: [{ level, userId }] }
-// 成功：201 DefVO
+//	@Summary		创建流程定义
+//	@Tags			工作流定义
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		createDefRequest	true	"流程定义"
+//	@Success		201		{object}	DefVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/workflow/def [post]
 func (h *Handler) CreateDef(c *gin.Context) {
-	var req struct {
-		Name       string `json:"name" binding:"required"`
-		AuditLevel int    `json:"auditLevel" binding:"required"`
-		LevelUsers []struct {
-			Level  int    `json:"level" binding:"required"`
-			UserID string `json:"userId" binding:"required"`
-		} `json:"levelUsers"`
-	}
+	var req createDefRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpx.Fail(c, http.StatusBadRequest, 40000, "参数错误")
 		return
@@ -226,12 +297,17 @@ func (h *Handler) CreateDef(c *gin.Context) {
 	httpx.Created(c, out)
 }
 
-// DefPage 分页查询流程定义列表。
+// DefPage 流程定义分页
 //
-// 路由：POST /api/v1/workflow/def/page
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		流程定义分页
+//	@Tags			工作流定义
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	DefPageResult
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/workflow/def/page [post]
 func (h *Handler) DefPage(c *gin.Context) {
 	h.postPage(c, func(c *gin.Context, page, pageSize int) (any, error) {
 		return h.svc.DefPage(c.Request.Context(), page, pageSize)

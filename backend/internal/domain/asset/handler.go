@@ -20,19 +20,25 @@ func NewHandler(svc Service, upload UploadService) *Handler {
 	return &Handler{svc: svc, upload: upload}
 }
 
-// pageRequest POST /api/v1/asset/page 请求体。
+// pageRequest 媒资分页请求体。
 type pageRequest struct {
-	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
-	Keyword  string `json:"keyword"`
+	Page     int    `json:"page" example:"1"`
+	PageSize int    `json:"pageSize" example:"20"`
+	Keyword  string `json:"keyword" example:""`
 }
 
-// Page 分页查询媒资列表。
+// Page 分页查询媒资
 //
-// 路由：POST /api/v1/asset/page
-// 鉴权：JWT Bearer
-// 请求体：{ page, pageSize, keyword? }
-// 成功：200 { list, total, page, pageSize }
+//	@Summary		分页查询媒资
+//	@Tags			媒资
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		pageRequest	true	"分页参数"
+//	@Success		200		{object}	PageResult
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/page [post]
 func (h *Handler) Page(c *gin.Context) {
 	var req pageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -51,13 +57,17 @@ func (h *Handler) Page(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// Get 按 ID 获取媒资详情。
+// Get 获取媒资详情
 //
-// 路由：GET /api/v1/asset/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 成功：200 AssetVO（含 previewUrl、metadata）
-// 失败：404 { err_code: 40401 }
+//	@Summary		获取媒资详情
+//	@Tags			媒资
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id	path		string	true	"媒资 ID"
+//	@Success		200	{object}	AssetVO
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/{id} [get]
 func (h *Handler) Get(c *gin.Context) {
 	id := c.Param("id")
 	result, err := h.svc.GetByID(c.Request.Context(), id)
@@ -68,7 +78,7 @@ func (h *Handler) Get(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// createRequest POST /api/v1/asset 请求体。
+// createRequest 创建媒资请求体。
 type createRequest struct {
 	Title       string            `json:"title" binding:"required"`
 	Type        string            `json:"type" binding:"required"`
@@ -81,12 +91,19 @@ type createRequest struct {
 	CreatedBy   string            `json:"createdBy"`
 }
 
-// Create 直接创建媒资（已有 storagePath 时使用，非分片上传流程）。
+// Create 创建媒资
 //
-// 路由：POST /api/v1/asset
-// 鉴权：JWT Bearer
-// 请求体：createRequest
-// 成功：201 AssetVO
+//	@Summary		创建媒资
+//	@Description	直接创建媒资（已有 storagePath，非分片上传流程）
+//	@Tags			媒资
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		createRequest	true	"媒资参数"
+//	@Success		201		{object}	AssetVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req createRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -115,7 +132,7 @@ func (h *Handler) Create(c *gin.Context) {
 	httpx.Created(c, result)
 }
 
-// updateRequest PUT /api/v1/asset/:id 请求体。
+// updateRequest 更新媒资请求体。
 type updateRequest struct {
 	Title       *string           `json:"title"`
 	CatalogID   *string           `json:"catalogId"`
@@ -124,13 +141,20 @@ type updateRequest struct {
 	Metadata    map[string]string `json:"metadata"`
 }
 
-// Update 更新媒资。
+// Update 更新媒资
 //
-// 路由：PUT /api/v1/asset/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 请求体：updateRequest（指针字段 nil 表示不修改）
-// 成功：200 AssetVO
+//	@Summary		更新媒资
+//	@Tags			媒资
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id		path		string			true	"媒资 ID"
+//	@Param			body	body		updateRequest	true	"更新参数"
+//	@Success		200		{object}	AssetVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Failure		404		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var req updateRequest
@@ -152,12 +176,17 @@ func (h *Handler) Update(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// Delete 软删除媒资。
+// Delete 删除媒资
 //
-// 路由：DELETE /api/v1/asset/:id
-// 鉴权：JWT Bearer
-// 路径参数：id
-// 成功：204 无响应体
+//	@Summary		删除媒资
+//	@Description	软删除媒资（GORM DeletedAt）
+//	@Tags			媒资
+//	@Security		BearerAuth
+//	@Param			id	path	string	true	"媒资 ID"
+//	@Success		204
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -167,7 +196,7 @@ func (h *Handler) Delete(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// uploadInitRequest POST /api/v1/asset/upload/init 请求体。
+// uploadInitRequest 初始化上传请求体。
 type uploadInitRequest struct {
 	FileName  string `json:"fileName" binding:"required"`
 	FileSize  int64  `json:"fileSize" binding:"required"`
@@ -175,12 +204,18 @@ type uploadInitRequest struct {
 	ChunkSize *int64 `json:"chunkSize"`
 }
 
-// UploadInit 初始化分片上传会话。
+// UploadInit 初始化分片上传
 //
-// 路由：POST /api/v1/asset/upload/init
-// 鉴权：JWT Bearer
-// 请求体：{ fileName, fileSize, mimeType?, chunkSize? }
-// 成功：200 { uploadId, chunkSize }
+//	@Summary		初始化分片上传
+//	@Tags			媒资上传
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		uploadInitRequest	true	"文件信息"
+//	@Success		200		{object}	UploadInitResult
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/upload/init [post]
 func (h *Handler) UploadInit(c *gin.Context) {
 	var req uploadInitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -204,13 +239,20 @@ func (h *Handler) UploadInit(c *gin.Context) {
 	httpx.OK(c, result)
 }
 
-// UploadChunk 上传单个分片。
+// UploadChunk 上传分片
 //
-// 路由：POST /api/v1/asset/upload/chunk
-// 鉴权：JWT Bearer
-// 表单字段：uploadId、chunkIndex、file（二进制分片）
-// 成功：204 无响应体
-// 失败：404 { err_code: 40402 } 上传会话不存在
+//	@Summary		上传分片
+//	@Tags			媒资上传
+//	@Accept			multipart/form-data
+//	@Security		BearerAuth
+//	@Param			uploadId	formData	string	true	"上传会话 ID"
+//	@Param			chunkIndex	formData	int		true	"分片序号（从 0 开始）"
+//	@Param			file		formData	file	true	"分片二进制"
+//	@Success		204
+//	@Failure		400	{object}	httpx.ErrorVo
+//	@Failure		401	{object}	httpx.ErrorVo
+//	@Failure		404	{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/upload/chunk [post]
 func (h *Handler) UploadChunk(c *gin.Context) {
 	uploadID := c.PostForm("uploadId")
 	chunkIndexStr := c.PostForm("chunkIndex")
@@ -245,7 +287,7 @@ func (h *Handler) UploadChunk(c *gin.Context) {
 	httpx.NoContent(c)
 }
 
-// uploadCompleteRequest POST /api/v1/asset/upload/complete 请求体。
+// uploadCompleteRequest 完成上传请求体。
 type uploadCompleteRequest struct {
 	UploadID   string  `json:"uploadId" binding:"required"`
 	AssetTitle string  `json:"assetTitle" binding:"required"`
@@ -253,12 +295,19 @@ type uploadCompleteRequest struct {
 	Type       string  `json:"type" binding:"required"`
 }
 
-// UploadComplete 完成分片上传并创建媒资。
+// UploadComplete 完成分片上传
 //
-// 路由：POST /api/v1/asset/upload/complete
-// 鉴权：JWT Bearer
-// 请求体：{ uploadId, assetTitle, catalogId?, type }
-// 成功：201 AssetVO（分片合并上传 S3 后入库）
+//	@Summary		完成分片上传
+//	@Description	合并分片、上传对象存储并创建媒资记录
+//	@Tags			媒资上传
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			body	body		uploadCompleteRequest	true	"完成参数"
+//	@Success		201		{object}	AssetVO
+//	@Failure		400		{object}	httpx.ErrorVo
+//	@Failure		401		{object}	httpx.ErrorVo
+//	@Router			/api/v1/asset/upload/complete [post]
 func (h *Handler) UploadComplete(c *gin.Context) {
 	var req uploadCompleteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

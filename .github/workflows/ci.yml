@@ -26,6 +26,9 @@ jobs:
       - name: Test
         run: go test ./... -race -count=1
 
+      - name: Verify Swagger docs
+        run: make swagger && git diff --exit-code docs/
+
   web:
     name: Web (React)
     runs-on: ubuntu-latest
