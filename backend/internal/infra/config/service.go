@@ -1,3 +1,4 @@
+// Package config L1 业务配置服务：gm_sys_config + Redis 缓存。
 package config
 
 import (
@@ -12,12 +13,19 @@ import (
 
 const defaultTenant = "default"
 
+// ErrNotFound 配置键不存在时返回的错误。
 var ErrNotFound = errors.New("config: not found")
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=service.go -destination=mock/service_mock.go -package=mock
+
+// Service 业务配置读写服务接口。
+// 读取顺序：Redis 缓存 → MySQL gm_sys_config；写入时 upsert 并失效缓存。
 type Service interface {
+	// Get 按配置键读取值，缓存未命中时回源数据库并回填 Redis。
 	Get(ctx context.Context, key string) (string, error)
+	// Set 写入或更新配置值，并清除对应 Redis 缓存。
 	Set(ctx context.Context, key, value string) error
+	// Invalidate 仅清除指定键的 Redis 缓存。
 	Invalidate(ctx context.Context, key string) error
 }
 

@@ -20,20 +20,30 @@ import (
 )
 
 const (
+	// ConfigKeyUploadChunkSize 分片上传块大小（字节）配置键。
 	ConfigKeyUploadChunkSize = "MAM_UPLOAD_CHUNK_SIZE"
-	DefaultUploadChunkSize    = 5242880
-	uploadSessionTTL          = 24 * time.Hour
-	ErrCodeUploadNotFound     = 40402
+	// DefaultUploadChunkSize 默认分片大小 5MB。
+	DefaultUploadChunkSize = 5242880
+	// uploadSessionTTL 上传会话在 Redis 中的过期时间。
+	uploadSessionTTL = 24 * time.Hour
+	// ErrCodeUploadNotFound 上传会话不存在时的业务错误码。
+	ErrCodeUploadNotFound = 40402
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=upload.go -destination=mock/upload_mock.go -package=mock
 
+// UploadService 媒资分片上传应用服务接口。
+// 流程：Init 创建会话 → SaveChunk 逐片写入 Redis → Complete 合并上传 S3 并创建媒资。
 type UploadService interface {
+	// Init 初始化上传会话，返回 uploadId 与建议分片大小。
 	Init(ctx context.Context, in UploadInitInput) (*UploadInitResult, error)
+	// SaveChunk 保存单个分片二进制数据至 Redis。
 	SaveChunk(ctx context.Context, in UploadChunkInput) error
+	// Complete 合并分片、上传对象存储并创建媒资记录。
 	Complete(ctx context.Context, in UploadCompleteInput) (*AssetVO, error)
 }
 
+// UploadInitInput 初始化上传入参。
 type UploadInitInput struct {
 	FileName  string
 	FileSize  int64
@@ -41,17 +51,20 @@ type UploadInitInput struct {
 	ChunkSize *int64
 }
 
+// UploadInitResult 初始化上传响应。
 type UploadInitResult struct {
 	UploadID  string `json:"uploadId"`
 	ChunkSize int64  `json:"chunkSize"`
 }
 
+// UploadChunkInput 上传单个分片入参。
 type UploadChunkInput struct {
 	UploadID   string
 	ChunkIndex int
 	Body       io.Reader
 }
 
+// UploadCompleteInput 完成上传并入参。
 type UploadCompleteInput struct {
 	UploadID   string
 	AssetTitle string
@@ -60,14 +73,21 @@ type UploadCompleteInput struct {
 	CreatedBy  string
 }
 
+// UploadSessionStore 上传会话持久化接口，默认 Redis 实现。
 type UploadSessionStore interface {
+	// SaveMeta 保存上传会话元信息。
 	SaveMeta(ctx context.Context, uploadID string, meta UploadMeta) error
+	// GetMeta 读取上传会话元信息。
 	GetMeta(ctx context.Context, uploadID string) (*UploadMeta, error)
+	// SaveChunk 保存指定序号的分片数据。
 	SaveChunk(ctx context.Context, uploadID string, index int, data []byte) error
+	// GetChunk 读取指定序号的分片数据。
 	GetChunk(ctx context.Context, uploadID string, index int) ([]byte, error)
+	// DeleteSession 删除上传会话及全部分片。
 	DeleteSession(ctx context.Context, uploadID string) error
 }
 
+// UploadMeta 上传会话元信息，存 Redis JSON。
 type UploadMeta struct {
 	FileName  string `json:"fileName"`
 	FileSize  int64  `json:"fileSize"`

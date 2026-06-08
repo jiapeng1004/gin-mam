@@ -1,3 +1,4 @@
+// Package search 检索领域：基于 Elasticsearch 的媒资全文检索。
 package search
 
 import (
@@ -12,14 +13,21 @@ import (
 
 const defaultTenant = "default"
 
+// SearchInput 媒资检索入参。
 type SearchInput struct {
-	Keyword   string
-	Page      int
-	PageSize  int
-	Type      string
+	// Keyword 标题关键字，空则仅按 filter 条件查询。
+	Keyword string
+	// Page 页码，从 1 开始。
+	Page int
+	// PageSize 每页条数。
+	PageSize int
+	// Type 媒资类型过滤，空则不过滤。
+	Type string
+	// CatalogID 编目 ID 过滤，空则不过滤。
 	CatalogID string
 }
 
+// AssetDocument Elasticsearch 索引文档结构。
 type AssetDocument struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
@@ -31,8 +39,11 @@ type AssetDocument struct {
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=service.go -destination=mock/service_mock.go -package=mock
 
+// Service 检索应用服务接口。
 type Service interface {
+	// SearchAsset 在 ES 中检索媒资 ID，再回源 asset.Service 拼装完整 AssetVO 列表。
 	SearchAsset(ctx context.Context, in SearchInput) (*asset.PageResult, error)
+	// ScheduleIndex 异步写入/更新 ES 索引文档，媒资变更后由 asset 层调用。
 	ScheduleIndex(doc asset.IndexDoc)
 }
 
@@ -41,6 +52,7 @@ type service struct {
 	assets   asset.Service
 }
 
+// NewService 构造检索服务，依赖 ES 客户端与媒资服务。
 func NewService(esClient elasticsearch.Client, assets asset.Service) Service {
 	return &service{esClient: esClient, assets: assets}
 }
@@ -58,6 +70,7 @@ func (s *service) ScheduleIndex(doc asset.IndexDoc) {
 	}(doc)
 }
 
+// MarshalAssetDocument 将 IndexDoc 序列化为 ES 索引 JSON。
 func MarshalAssetDocument(doc asset.IndexDoc) ([]byte, error) {
 	return json.Marshal(AssetDocument{
 		ID:        doc.ID,
@@ -101,6 +114,7 @@ func (s *service) SearchAsset(ctx context.Context, in SearchInput) (*asset.PageR
 	}, nil
 }
 
+// BuildAssetSearchQuery 构造 ES bool 查询 DSL。
 func BuildAssetSearchQuery(tenantID string, in SearchInput, page, pageSize int) map[string]any {
 	from := (page - 1) * pageSize
 	filter := []map[string]any{
