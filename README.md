@@ -60,6 +60,17 @@ flutter run                  # 模拟器默认 API: http://10.0.2.2:8080/api/v1
 
 ## 生产部署
 
+### 拉取镜像（阿里云 ACR）
+
+```bash
+docker pull registry.cn-hangzhou.aliyuncs.com/jp_aoa/gin-mam:latest
+docker run -d -p 8080:80 registry.cn-hangzhou.aliyuncs.com/jp_aoa/gin-mam:latest
+```
+
+`master` 分支 push 后 GitHub Actions 自动构建并推送 `:latest`（需配置仓库 Secret `ALIYUN_ACR_PASSWORD`）。
+
+### 本地构建
+
 ```bash
 cd backend && make vendor && cd ..
 docker build -f deploy/Dockerfile -t gin-mam:latest .
