@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -98,10 +97,7 @@ func Build(cfg *Config) (*Graph, error) {
 	})
 	sysHandler := sys.NewHandler(sysSvc)
 	assetRepo := asset.NewMySQLRepository(db)
-	objectStorage, err := storage.NewS3Storage(context.Background(), configSvc)
-	if err != nil {
-		return nil, fmt.Errorf("storage: %w", err)
-	}
+	objectStorage := storage.NewS3Storage(configSvc)
 	assetSvc := asset.NewService(assetRepo, configSvc, txMgr, nil)
 	esClient, err := elasticsearch.NewClient(cfg.Elasticsearch.Addresses)
 	if err != nil {

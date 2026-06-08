@@ -42,7 +42,9 @@ type s3Settings struct {
 	pathStyle  bool
 }
 
-// S3Storage implements Storage using S3-compatible APIs; rebuild via NewS3Storage when config changes.
+// S3Storage 基于 S3 兼容 API 的对象存储实现。
+// S3 连接参数来自 L1 ConfigService（gm_sys_config），与 MySQL/Redis 等 L0 静态配置不同，
+// 仅在首次 Put/Delete/PresignPut 时懒加载配置并创建 AWS 客户端。
 type S3Storage struct {
 	cfg config.Service
 
@@ -52,13 +54,9 @@ type S3Storage struct {
 	settings  s3Settings
 }
 
-// NewS3Storage loads S3 settings from ConfigService. The AWS client is created lazily on first use.
-func NewS3Storage(ctx context.Context, cfg config.Service) (*S3Storage, error) {
-	settings, err := loadS3Settings(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-	return &S3Storage{cfg: cfg, settings: settings}, nil
+// NewS3Storage 构造 S3 存储实例，不在此处读取配置或连接 S3。
+func NewS3Storage(cfg config.Service) *S3Storage {
+	return &S3Storage{cfg: cfg}
 }
 
 func loadS3Settings(ctx context.Context, cfg config.Service) (s3Settings, error) {
@@ -124,6 +122,7 @@ func requireConfig(ctx context.Context, cfg config.Service, key string, missing 
 	return val, nil
 }
 
+// ensureClient 首次使用时从 ConfigService 加载 S3 配置并创建 AWS 客户端。
 func (s *S3Storage) ensureClient(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -131,10 +130,15 @@ func (s *S3Storage) ensureClient(ctx context.Context) error {
 		return nil
 	}
 
+	settings, err := loadS3Settings(ctx, s.cfg)
+	if err != nil {
+		return err
+	}
+
 	awsCfg, err := awsconfig.LoadDefaultConfig(ctx,
-		awsconfig.WithRegion(s.settings.region),
+		awsconfig.WithRegion(settings.region),
 		awsconfig.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(s.settings.accessKey, s.settings.secretKey, ""),
+			credentials.NewStaticCredentialsProvider(settings.accessKey, settings.secretKey, ""),
 		),
 	)
 	if err != nil {
@@ -142,9 +146,10 @@ func (s *S3Storage) ensureClient(ctx context.Context) error {
 	}
 
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(s.settings.endpoint)
-		o.UsePathStyle = s.settings.pathStyle
+		o.BaseEndpoint = aws.String(settings.endpoint)
+		o.UsePathStyle = settings.pathStyle
 	})
+	s.settings = settings
 	s.client = client
 	s.presigner = s3.NewPresignClient(client)
 	return nil
