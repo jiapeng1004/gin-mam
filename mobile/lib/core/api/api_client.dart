@@ -1,6 +1,8 @@
 /// HTTP 客户端：基于 Dio，对齐 Web `apiClient` 的 2xx 解包与 ErrorVo 错误处理。
 library;
 
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:gin_mam_mobile/core/api/api_error.dart';
 import 'package:gin_mam_mobile/core/api/auth_storage.dart';
@@ -31,10 +33,14 @@ class ApiClient {
   /// 令牌存储，供请求拦截器注入 Bearer 头。
   final AuthStorage authStorage;
 
+  /// 收到 HTTP 401 且已清除本地令牌后的回调（通常跳转登录页）。
+  final VoidCallback? onUnauthorized;
+
   /// 使用已有 [dio] 与 [authStorage] 构造（测试可注入自定义 Dio）。
   ApiClient({
     required Dio dio,
     required this.authStorage,
+    this.onUnauthorized,
   }) : _dio = dio {
     _attachAuthInterceptors();
   }
@@ -52,6 +58,7 @@ class ApiClient {
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
             await authStorage.clearToken();
+            onUnauthorized?.call();
           }
           handler.next(error);
         },
@@ -62,6 +69,7 @@ class ApiClient {
   /// 创建默认配置的客户端实例。
   factory ApiClient.create({
     required AuthStorage authStorage,
+    VoidCallback? onUnauthorized,
     String baseUrl = defaultApiBaseUrl,
     Duration timeout = apiTimeout,
   }) {
@@ -75,7 +83,11 @@ class ApiClient {
       ),
     );
 
-    return ApiClient(dio: dio, authStorage: authStorage);
+    return ApiClient(
+      dio: dio,
+      authStorage: authStorage,
+      onUnauthorized: onUnauthorized,
+    );
   }
 
   /// 当前 Dio 实例（测试时替换 [httpClientAdapter]）。
