@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS gm_role_menu;
+DROP TABLE IF EXISTS gm_user_role;
+DROP TABLE IF EXISTS gm_sys_config;
+DROP TABLE IF EXISTS gm_menu;
+DROP TABLE IF EXISTS gm_org;
+DROP TABLE IF EXISTS gm_role;
+DROP TABLE IF EXISTS gm_user;

@@ -323,7 +323,11 @@ web/src/features/
 
 axios：`2xx → response.data` 即业务体；`4xx/5xx → err_code / err_msg`
 
+<<<<<<< HEAD
 ### 7.2 Flutter MVP（Ant Design Flutter 生态）
+=======
+### 7.2 移动端 MVP（Flutter + Ant Design Flutter 生态）
+>>>>>>> feat/gin-mam-m1
 
 ```
 mobile/lib/features/
@@ -333,9 +337,15 @@ mobile/lib/features/
 
 **技术选型：**
 - 框架：**Flutter 3**
+<<<<<<< HEAD
 - UI：**`antd_flutter_mobile`**（Ant Design Mobile for Flutter，与 Web Ant Design 设计语言一致，适合审核端）
 - 备选：`ant_design_flutter` 偏 Web/桌面，MVP 移动端不优先
 - 状态/API：Riverpod 或 Provider + Dio
+=======
+- UI：**`antd_flutter_mobile`**（Ant Design Mobile，与 Web Ant Design 设计语言一致）
+- 不用 `ant_design_flutter`（偏 Web/桌面，官方不推荐移动端）
+- 网络：Dio；状态：Riverpod
+>>>>>>> feat/gin-mam-m1
 
 仅登录 + 待审 + 审核；上传/编目留 Web。
 

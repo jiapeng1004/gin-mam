@@ -1,0 +1,23 @@
+package httpx
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func OK(c *gin.Context, data any) {
+	c.JSON(http.StatusOK, data)
+}
+
+func Created(c *gin.Context, data any) {
+	c.JSON(http.StatusCreated, data)
+}
+
+func NoContent(c *gin.Context) {
+	c.Status(http.StatusNoContent)
+}
+
+func Fail(c *gin.Context, httpStatus, errCode int, msg string) {
+	c.JSON(httpStatus, ErrorVo{ErrCode: errCode, ErrMsg: msg})
+}

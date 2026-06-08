@@ -1,0 +1,11 @@
+.git
+.worktrees
+**/.git
+**/node_modules
+**/dist
+**/build
+**/.dart_tool
+mobile/
+docs/
+*.md
+!web/README.md
