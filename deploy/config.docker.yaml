@@ -1,0 +1,16 @@
+# Docker Compose 环境用 L0 配置（服务名作为主机名）
+server:
+  port: 8080
+  mode: release
+mysql:
+  dsn: "root:root@tcp(mysql:3306)/gin_mam?charset=utf8mb4&parseTime=True&loc=UTC"
+redis:
+  addr: "redis:6379"
+  db: 0
+elasticsearch:
+  addresses: ["http://elasticsearch:9200"]
+jwt:
+  secret: "change-me-in-production"
+  expire_hours: 24
+log:
+  level: info

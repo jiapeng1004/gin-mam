@@ -14,3 +14,12 @@ services:
       discovery.type: single-node
       xpack.security.enabled: "false"
     ports: ["9200:9200"]
+  app:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    ports: ["8080:80"]
+    depends_on:
+      - mysql
+      - redis
+      - elasticsearch
